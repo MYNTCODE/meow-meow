@@ -11,7 +11,6 @@ interface CatActorProps {
   cat: Cat;
   behavior: CatBehaviorSnapshot;
   placedFurniture: PlacedFurniture[];
-  renderOrder: number;
 }
 
 function getRestInteraction(
@@ -34,7 +33,6 @@ export function CatActor({
   cat,
   behavior,
   placedFurniture,
-  renderOrder,
 }: CatActorProps) {
   const sprite = cat.sprite;
   const aspectRatio = `${sprite.sourceWidth} / ${sprite.sourceHeight}`;
@@ -64,7 +62,6 @@ export function CatActor({
         top: `calc(${behavior.y}% + ${responsiveRestOffsetY})`,
         width: displayWidth,
         aspectRatio,
-        zIndex: renderOrder,
       }}
       aria-label={`${cat.name} is ${behavior.state}`}
     >
