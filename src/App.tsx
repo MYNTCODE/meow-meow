@@ -16,7 +16,7 @@ export default function App() {
     <main className={styles.gameShell}>
       <TopStatusBar coins={state.coins} />
       <section className={styles.playArea}>
-        <RoomView state={state} />
+        <RoomView state={state} dispatch={dispatch} />
       </section>
       <DevResetButton />
       <BottomPanel activePanel={state.activePanel} />

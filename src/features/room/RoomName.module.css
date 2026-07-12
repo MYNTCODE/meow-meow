@@ -1,0 +1,119 @@
+.display,
+.editor {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.display {
+  min-width: 0;
+}
+
+.roomName {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #4b3829;
+  font-size: 1rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editButton,
+.primaryButton,
+.secondaryButton {
+  border: 3px solid #6f4e37;
+  background: #fff7ec;
+  color: #4b3829;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.editButton {
+  min-height: 26px;
+  padding: 2px 8px;
+  border-width: 2px;
+  font-size: 0.8125rem;
+}
+
+.inputRow {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.input {
+  min-width: 0;
+  flex: 1 1 190px;
+  border: 2px solid #6f4e37;
+  background: #fff7ec;
+  color: #4b3829;
+  padding: 5px 8px;
+  font: inherit;
+  font-weight: 700;
+}
+
+.input:focus-visible,
+.editButton:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 3px solid #f2c66d;
+  outline-offset: 2px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 28px;
+  padding: 4px 8px;
+  border-width: 2px;
+  font-size: 0.8125rem;
+}
+
+.primaryButton {
+  background: #f2c66d;
+}
+
+.secondaryButton {
+  background: #fff1df;
+}
+
+.validationMessage {
+  min-height: 1em;
+  margin: 0;
+  color: #8f4d3c;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .display,
+  .editor {
+    gap: 4px;
+  }
+
+  .roomName {
+    font-size: 0.875rem;
+  }
+
+  .editButton {
+    min-height: 24px;
+    padding: 1px 6px;
+    font-size: 0.75rem;
+  }
+
+  .input {
+    flex-basis: 126px;
+    padding: 4px 6px;
+    font-size: 0.875rem;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    min-height: 24px;
+    padding: 3px 6px;
+    font-size: 0.75rem;
+  }
+}

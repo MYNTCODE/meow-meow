@@ -1,16 +1,25 @@
 import { getFurnitureItem } from '../data/furniture';
 import { defaultCat } from '../data/cats';
 import type { FurnitureId, GameState, PanelView } from '../types/game';
+import { DEFAULT_ROOM_NAME, normalizeRoomName } from '../utils/roomName';
+import type { FurniturePlacement, PlacedFurniture } from '../types/game';
+
+function buildPlacedFurnitureInstanceId(furnitureId: FurnitureId, positionId: string) {
+  return `${positionId}:${furnitureId}`;
+}
 
 export type GameAction =
   | { type: 'earnCoins'; amount: number }
   | { type: 'buyFurniture'; furnitureId: FurnitureId }
   | { type: 'placeFurniture'; furnitureId: FurnitureId; positionId: string }
+  | { type: 'setPlacedFurnitureLayout'; placedFurniture: PlacedFurniture[] }
   | { type: 'setActivePanel'; panel: PanelView }
+  | { type: 'setRoomName'; roomName: string }
   | { type: 'resetGame' };
 
 export const DEFAULT_GAME_STATE: GameState = {
   coins: 20,
+  roomName: DEFAULT_ROOM_NAME,
   cat: defaultCat,
   inventory: [],
   placedFurniture: [],
@@ -34,12 +43,59 @@ function addInventoryItem(
   return [...inventory, { furnitureId, quantity: 1 }];
 }
 
+function getDefaultPlacedFurniture(
+  furnitureId: FurnitureId,
+  positionId: string,
+): PlacedFurniture | undefined {
+  const furniture = getFurnitureItem(furnitureId);
+
+  if (!furniture) {
+    return undefined;
+  }
+
+  return {
+    instanceId: buildPlacedFurnitureInstanceId(furnitureId, positionId),
+    furnitureId,
+    positionId,
+    placement: {
+      x: furniture.placement.x,
+      y: furniture.placement.y,
+      width: furniture.placement.width,
+      zIndex: furniture.placement.zIndex,
+    },
+  };
+}
+
+function normalizePlacedFurniture(
+  placedFurniture: GameState['placedFurniture'],
+): GameState['placedFurniture'] {
+  return placedFurniture.flatMap((item) => {
+    const defaultItem = getDefaultPlacedFurniture(item.furnitureId, item.positionId);
+
+    if (!defaultItem) {
+      return [];
+    }
+
+    return [
+      {
+        ...defaultItem,
+        instanceId:
+          item.instanceId ?? buildPlacedFurnitureInstanceId(item.furnitureId, item.positionId),
+        placement: item.placement ?? defaultItem.placement,
+      },
+    ];
+  });
+}
+
 export function createInitialGameState(savedState: Partial<GameState> = {}): GameState {
   return {
     ...DEFAULT_GAME_STATE,
     coins: savedState.coins ?? DEFAULT_GAME_STATE.coins,
+    roomName: normalizeRoomName(savedState.roomName),
     inventory: savedState.inventory ?? DEFAULT_GAME_STATE.inventory,
-    placedFurniture: savedState.placedFurniture ?? DEFAULT_GAME_STATE.placedFurniture,
+    placedFurniture: normalizePlacedFurniture(
+      savedState.placedFurniture ?? DEFAULT_GAME_STATE.placedFurniture,
+    ),
     activePanel: 'room',
   };
 }
@@ -89,6 +145,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ? addInventoryItem(inventoryAfterPlacement, existingPlacedItem.furnitureId)
         : inventoryAfterPlacement;
 
+      const defaultPlacedFurniture = getDefaultPlacedFurniture(
+        action.furnitureId,
+        action.positionId,
+      );
+
+      if (!defaultPlacedFurniture) {
+        return state;
+      }
+
       return {
         ...state,
         inventory,
@@ -96,18 +161,27 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           ...state.placedFurniture.filter(
             (item) => item.positionId !== action.positionId,
           ),
-          {
-            furnitureId: action.furnitureId,
-            positionId: action.positionId,
-          },
+          defaultPlacedFurniture,
         ],
       };
     }
+
+    case 'setPlacedFurnitureLayout':
+      return {
+        ...state,
+        placedFurniture: normalizePlacedFurniture(action.placedFurniture),
+      };
 
     case 'setActivePanel':
       return {
         ...state,
         activePanel: action.panel,
+      };
+
+    case 'setRoomName':
+      return {
+        ...state,
+        roomName: action.roomName,
       };
 
     case 'resetGame':

@@ -1,4 +1,5 @@
 import { CoinBalance } from '../features/economy/CoinBalance';
+import { RoomNameDisplay } from '../features/room/RoomNameDisplay';
 import styles from './TopStatusBar.module.css';
 
 interface TopStatusBarProps {
@@ -8,7 +9,9 @@ interface TopStatusBarProps {
 export function TopStatusBar({ coins }: TopStatusBarProps) {
   return (
     <header className={styles.statusBar}>
-      <h1>Meow Meow Room</h1>
+      <div className={styles.roomNameGroup}>
+        <RoomNameDisplay />
+      </div>
       <CoinBalance coins={coins} />
     </header>
   );

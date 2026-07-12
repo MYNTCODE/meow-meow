@@ -28,6 +28,13 @@ export interface CollisionBox {
   height: number;
 }
 
+export interface FurniturePlacement {
+  x: number;
+  y: number;
+  width: number;
+  zIndex: number;
+}
+
 export interface CatPosition {
   leftPercent: number;
   floorOffsetPx: number;
@@ -77,6 +84,8 @@ export interface FurnitureItem {
     catOffsetX: number;
     catOffsetY: number;
     catFacingDirection?: FacingDirection;
+    catRenderOffsetX?: number;
+    catRenderOffsetY?: number;
   };
   collision?: CollisionBox & {
     solid: boolean;
@@ -89,12 +98,15 @@ export interface InventoryItem {
 }
 
 export interface PlacedFurniture {
+  instanceId: string;
   furnitureId: FurnitureId;
   positionId: string;
+  placement: FurniturePlacement;
 }
 
 export interface GameState {
   coins: number;
+  roomName: string;
   cat: Cat;
   inventory: InventoryItem[];
   placedFurniture: PlacedFurniture[];
