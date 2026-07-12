@@ -96,7 +96,6 @@ export function RoomView({ state }: RoomViewProps) {
                 cat={state.cat}
                 behavior={catBehavior}
                 placedFurniture={state.placedFurniture}
-                renderOrder={index + 1}
               />
             );
           })}
