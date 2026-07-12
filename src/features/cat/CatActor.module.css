@@ -3,7 +3,6 @@
   transform: translate(-50%, -100%);
   image-rendering: pixelated;
   pointer-events: none;
-  z-index: 4;
 }
 
 .debugOutline {

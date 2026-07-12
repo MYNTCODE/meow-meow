@@ -16,7 +16,7 @@ export const defaultCat: Cat = {
       offsetX: -4,
       offsetY: -4,
       width: 8,
-      height: 5,
+      height: 4,
     },
     showDebugOutline: false,
   },

@@ -8,6 +8,7 @@ import type {
 interface UseCatKeyboardControlsOptions {
   commands: CatBehaviorCommands;
   commandState: CatCommandState;
+  disabled?: boolean;
 }
 
 const MOVE_LEFT_KEYS = new Set(['ArrowLeft', 'a', 'A']);
@@ -40,6 +41,7 @@ function isTypingTarget(target: EventTarget | null) {
 export function useCatKeyboardControls({
   commands,
   commandState,
+  disabled = false,
 }: UseCatKeyboardControlsOptions): CatPressedKeys {
   const [pressedKeys, setPressedKeys] = useState<CatPressedKeys>({
     leftPressed: false,
@@ -49,6 +51,7 @@ export function useCatKeyboardControls({
   });
   const commandsRef = useRef(commands);
   const commandStateRef = useRef(commandState);
+  const disabledRef = useRef(disabled);
 
   useEffect(() => {
     commandsRef.current = commands;
@@ -57,6 +60,10 @@ export function useCatKeyboardControls({
   useEffect(() => {
     commandStateRef.current = commandState;
   }, [commandState]);
+
+  useEffect(() => {
+    disabledRef.current = disabled;
+  }, [disabled]);
 
   useEffect(() => {
     function clearPressedKeys() {
@@ -69,6 +76,10 @@ export function useCatKeyboardControls({
     }
 
     function handleKeyDown(event: KeyboardEvent) {
+      if (disabledRef.current) {
+        return;
+      }
+
       if (isTypingTarget(event.target)) {
         return;
       }
@@ -144,6 +155,10 @@ export function useCatKeyboardControls({
     }
 
     function handleKeyUp(event: KeyboardEvent) {
+      if (disabledRef.current) {
+        return;
+      }
+
       if (isTypingTarget(event.target)) {
         return;
       }
@@ -202,6 +217,19 @@ export function useCatKeyboardControls({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+
+  useEffect(() => {
+    if (!disabled) {
+      return;
+    }
+
+    setPressedKeys({
+      leftPressed: false,
+      rightPressed: false,
+      upPressed: false,
+      downPressed: false,
+    });
+  }, [disabled]);
 
   return pressedKeys;
 }
