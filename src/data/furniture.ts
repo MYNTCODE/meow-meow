@@ -30,9 +30,9 @@ export const FURNITURE_ITEMS: FurnitureItem[] = [
     collision: {
       solid: true,
       offsetX: -9,
-      offsetY: -2,
+      offsetY: 0,
       width: 18,
-      height: 10,
+      height: 14,
     },
   },
   {
@@ -64,9 +64,9 @@ export const FURNITURE_ITEMS: FurnitureItem[] = [
     collision: {
       solid: true,
       offsetX: -9,
-      offsetY: -2,
+      offsetY: 0,
       width: 18,
-      height: 10,
+      height: 14,
     },
   },
 ];
