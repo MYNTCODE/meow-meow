@@ -31,6 +31,7 @@ interface UseContinuousCatMovementOptions {
   cat: Cat;
   placedFurniture: PlacedFurniture[];
   setMovementBlocked: React.Dispatch<React.SetStateAction<boolean>>;
+  disabled?: boolean;
 }
 
 export function useContinuousCatMovement({
@@ -40,6 +41,7 @@ export function useContinuousCatMovement({
   cat,
   placedFurniture,
   setMovementBlocked,
+  disabled = false,
 }: UseContinuousCatMovementOptions) {
   const animationFrameRef = useRef<number | undefined>(undefined);
   const lastFrameTimeRef = useRef<number | undefined>(undefined);
@@ -67,6 +69,21 @@ export function useContinuousCatMovement({
       }
 
       lastFrameTimeRef.current = undefined;
+    }
+
+    if (disabled) {
+      cancelMovementFrame();
+      setMovementBlocked(false);
+      setBehavior((currentBehavior) =>
+        currentBehavior.state === 'walking'
+          ? {
+              ...currentBehavior,
+              state: 'idle',
+              currentInteractionItemId: undefined,
+            }
+          : currentBehavior,
+      );
+      return cancelMovementFrame;
     }
 
     const shouldMove =
@@ -169,6 +186,7 @@ export function useContinuousCatMovement({
     return cancelMovementFrame;
   }, [
     behavior.state,
+    disabled,
     cat,
     pressedKeys.leftPressed,
     pressedKeys.downPressed,

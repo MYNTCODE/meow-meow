@@ -1,0 +1,27 @@
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.label {
+  color: #4b3829;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.button {
+  border: 3px solid #4b3829;
+  background: #fff7ec;
+  color: #4b3829;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

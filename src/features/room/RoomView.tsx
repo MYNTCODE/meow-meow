@@ -1,42 +1,62 @@
-import { useState } from 'react';
+import { useRef, useState, type Dispatch } from 'react';
 import { gameAssets } from '../../data/assets';
 import { useCatBehavior } from '../../hooks/useCatBehavior';
+import { useRoomEditMode } from '../../hooks/useRoomEditMode';
 import { CatActor } from '../cat/CatActor';
 import { CatControlPanel } from '../cat/CatControlPanel';
 import { FurnitureSprite } from './FurnitureSprite';
+import { RoomEditControls } from './RoomEditControls';
 import { RoomDebugOverlay } from './RoomDebugOverlay';
 import type { GameState } from '../../types/game';
+import type { GameAction } from '../../store/gameReducer';
 import { getFurnitureItem } from '../../data/furniture';
 import { getCatDepthAnchorY, getFurnitureDepthAnchorY } from '../../utils/collision';
 import styles from './RoomView.module.css';
 
 interface RoomViewProps {
   state: GameState;
+  dispatch: Dispatch<GameAction>;
 }
 
-export function RoomView({ state }: RoomViewProps) {
+export function RoomView({ state, dispatch }: RoomViewProps) {
   const [assetFailed, setAssetFailed] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
+  const [isRoomEditing, setIsRoomEditing] = useState(false);
+  const roomRef = useRef<HTMLElement | null>(null);
   const canShowDebug = import.meta.env.DEV;
   const {
     catBehavior,
+    commands,
+    commandState,
     movementPoints,
     movementBlocked,
-  } = useCatBehavior(state.cat, state.placedFurniture);
+  } = useCatBehavior(state.cat, state.placedFurniture, isRoomEditing);
+  const roomEdit = useRoomEditMode({
+    cat: state.cat,
+    catPosition: catBehavior,
+    dispatch,
+    isEditing: isRoomEditing,
+    placedFurniture: state.placedFurniture,
+    roomRef,
+    setIsEditing: setIsRoomEditing,
+  });
+  const placedFurniture = roomEdit.renderedPlacedFurniture;
   const roomObjects = [
-    ...state.placedFurniture.map((placedItem) => {
+    ...placedFurniture.map((placedItem) => {
       const furniture = getFurnitureItem(placedItem.furnitureId);
       const depth = furniture ? getFurnitureDepthAnchorY(furniture, placedItem) : 0;
+      const dragBindings = roomEdit.dragBindings(placedItem);
       const isInteracted =
         catBehavior.state === 'resting' &&
         catBehavior.currentInteractionItemId === placedItem.furnitureId;
 
       return {
-        id: `furniture-${placedItem.positionId}`,
+        id: `furniture-${placedItem.instanceId}`,
         type: 'furniture' as const,
         depth,
         placedItem,
-        sortBoost: isInteracted ? -0.01 : 0,
+        dragBindings,
+        sortBoost: dragBindings.isDragging ? 1000 : isInteracted ? -0.01 : 0,
       };
     }),
     {
@@ -47,9 +67,24 @@ export function RoomView({ state }: RoomViewProps) {
     },
   ].sort((a, b) => a.depth + a.sortBoost - (b.depth + b.sortBoost));
 
+  function handleEditRoom() {
+    if (commandState.canStand) {
+      commands.stand();
+    }
+
+    roomEdit.enterEditMode();
+  }
+
   return (
     <div className={styles.roomStack}>
-      <section className={styles.roomFrame} aria-label="Mew Mew room">
+      <RoomEditControls
+        isEditing={roomEdit.isEditing}
+        isLayoutValid={roomEdit.isLayoutValid}
+        onCancel={roomEdit.cancelLayout}
+        onEdit={handleEditRoom}
+        onSave={roomEdit.saveLayout}
+      />
+      <section ref={roomRef} className={styles.roomFrame} aria-label="Mew Mew room">
         {canShowDebug ? (
           <button
             className={styles.debugToggle}
@@ -86,6 +121,8 @@ export function RoomView({ state }: RoomViewProps) {
                   key={object.id}
                   placedFurniture={object.placedItem}
                   renderOrder={index + 1}
+                  dragBindings={object.dragBindings}
+                  isInvalid={roomEdit.invalidFurnitureIds.has(object.placedItem.instanceId)}
                 />
               );
             }
@@ -95,7 +132,8 @@ export function RoomView({ state }: RoomViewProps) {
                 key={object.id}
                 cat={state.cat}
                 behavior={catBehavior}
-                placedFurniture={state.placedFurniture}
+                placedFurniture={placedFurniture}
+                renderOrder={index + 1}
               />
             );
           })}
@@ -105,8 +143,9 @@ export function RoomView({ state }: RoomViewProps) {
             behavior={catBehavior}
             movementBlocked={movementBlocked}
             movementPoints={movementPoints}
-            placedFurniture={state.placedFurniture}
+            placedFurniture={placedFurniture}
             cat={state.cat}
+            furnitureDragDebug={roomEdit.dragDebugState}
           />
         ) : null}
       </section>

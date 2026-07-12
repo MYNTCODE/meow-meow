@@ -50,6 +50,7 @@ function getFloorPointForInteractionPoint(pointId: string) {
 export function useCatBehavior(
   cat: Cat,
   placedFurniture: PlacedFurniture[],
+  inputDisabled = false,
 ) {
   const [snapshot, setSnapshot] = useState<CatBehaviorSnapshot>(getInitialSnapshot);
   const [movementBlocked, setMovementBlocked] = useState(false);
@@ -150,7 +151,7 @@ export function useCatBehavior(
     canStand,
     isWalking: snapshot.state === 'walking',
   };
-  const pressedKeys = useCatKeyboardControls({ commands, commandState });
+  const pressedKeys = useCatKeyboardControls({ commands, commandState, disabled: inputDisabled });
 
   useContinuousCatMovement({
     pressedKeys,
@@ -159,6 +160,7 @@ export function useCatBehavior(
     cat,
     placedFurniture,
     setMovementBlocked,
+    disabled: inputDisabled,
   });
 
   return {

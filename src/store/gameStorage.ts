@@ -4,7 +4,7 @@ const STORAGE_KEY = 'mew-mew-room-save-v1';
 
 export type PersistedGameState = Pick<
   GameState,
-  'coins' | 'inventory' | 'placedFurniture'
+  'coins' | 'roomName' | 'inventory' | 'placedFurniture'
 >;
 
 export function loadGameState(): Partial<PersistedGameState> {
@@ -24,6 +24,7 @@ export function loadGameState(): Partial<PersistedGameState> {
 export function saveGameState(state: GameState) {
   const saveData: PersistedGameState = {
     coins: state.coins,
+    roomName: state.roomName,
     inventory: state.inventory,
     placedFurniture: state.placedFurniture,
   };

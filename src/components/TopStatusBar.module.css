@@ -10,9 +10,32 @@
   background: #ffe6c9;
 }
 
+.roomNameGroup {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 140px);
+}
+
 .statusBar h1 {
   margin: 0;
   color: #4b3829;
   font-size: 1.125rem;
   letter-spacing: 0;
+}
+
+@media (max-width: 560px) {
+  .statusBar {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .roomNameGroup {
+    max-width: calc(100% - 92px);
+  }
+
+  .statusBar h1 {
+    font-size: 1rem;
+  }
 }

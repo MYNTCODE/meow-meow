@@ -18,21 +18,22 @@ export const FURNITURE_ITEMS: FurnitureItem[] = [
       zIndex: 2,
     },
     rendering: {
-      depthAnchorOffsetY: 0,
+      depthAnchorOffsetY: -8,
     },
     interaction: {
       type: 'rest',
       range: 20,
       catOffsetX: 0,
-      catOffsetY: -26,
+      catOffsetY: -1.6,
       catFacingDirection: 'right',
+      catRenderOffsetY: -26,
     },
     collision: {
       solid: true,
       offsetX: -9,
-      offsetY: 0,
+      offsetY: -4,
       width: 18,
-      height: 14,
+      height: 8,
     },
   },
   {
@@ -52,14 +53,15 @@ export const FURNITURE_ITEMS: FurnitureItem[] = [
       zIndex: 2,
     },
     rendering: {
-      depthAnchorOffsetY: 0,
+      depthAnchorOffsetY: -8,
     },
     interaction: {
       type: 'rest',
       range: 20,
       catOffsetX: 0,
-      catOffsetY: -26,
+      catOffsetY: -1.6,
       catFacingDirection: 'right',
+      catRenderOffsetY: -26,
     },
     collision: {
       solid: true,

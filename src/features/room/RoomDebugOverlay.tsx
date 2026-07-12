@@ -1,5 +1,6 @@
 import type { CatMovementPoint } from '../../data/catMovementPoints';
 import { roomWalkableArea } from '../../data/roomMovementConfig';
+import type { FurnitureDragDebugState } from '../../hooks/useFurnitureDrag';
 import type { CatBehaviorSnapshot } from '../../types/catBehavior';
 import type { Cat, PlacedFurniture } from '../../types/game';
 import {
@@ -18,6 +19,7 @@ interface RoomDebugOverlayProps {
   movementBlocked: boolean;
   movementPoints: CatMovementPoint[];
   placedFurniture: PlacedFurniture[];
+  furnitureDragDebug: FurnitureDragDebugState | null;
 }
 
 function getRectStyle(rect: { left: number; top: number; right: number; bottom: number }) {
@@ -35,6 +37,7 @@ export function RoomDebugOverlay({
   movementBlocked,
   movementPoints,
   placedFurniture,
+  furnitureDragDebug,
 }: RoomDebugOverlayProps) {
   const catCollisionRect = getCatCollisionRect(cat, behavior);
   const catDepthAnchorY = getCatDepthAnchorY(behavior);
@@ -83,7 +86,7 @@ export function RoomDebugOverlay({
       ))}
       <span className={styles.catCollision} style={getRectStyle(catCollisionRect)} />
       {furnitureDebugItems.map(({ collisionRect, depthAnchorY, furniture, interactionPoint, placedItem }) => (
-        <span key={`${placedItem.positionId}-${placedItem.furnitureId}`}>
+        <span key={placedItem.instanceId}>
           {collisionRect ? (
             <span
               className={
@@ -108,7 +111,7 @@ export function RoomDebugOverlay({
           <span
             className={styles.depthAnchor}
             style={{
-              left: `${furniture.placement.x}%`,
+              left: `${placedItem.placement.x}%`,
               top: `${depthAnchorY}%`,
             }}
           />
@@ -134,6 +137,26 @@ export function RoomDebugOverlay({
         <span>Facing: {behavior.facingDirection}</span>
         <span>Blocked: {movementBlocked ? 'yes' : 'no'}</span>
         <span>Cat depth: {catDepthAnchorY.toFixed(1)}</span>
+        {furnitureDragDebug ? (
+          <>
+            <span>Drag item: {furnitureDragDebug.itemId}</span>
+            <span>
+              Drag original: {furnitureDragDebug.originalPosition.x.toFixed(1)},
+              {' '}
+              {furnitureDragDebug.originalPosition.y.toFixed(1)}
+            </span>
+            <span>
+              Drag preview: {furnitureDragDebug.previewPosition.x.toFixed(1)},
+              {' '}
+              {furnitureDragDebug.previewPosition.y.toFixed(1)}
+            </span>
+            <span>
+              Drag offset: {furnitureDragDebug.pointerOffset.x.toFixed(1)},
+              {' '}
+              {furnitureDragDebug.pointerOffset.y.toFixed(1)}
+            </span>
+          </>
+        ) : null}
       </div>
     </div>
   );
