@@ -1,0 +1,28 @@
+.gameShell {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(100%, 920px);
+  min-height: 100vh;
+  margin: 0 auto;
+  border-left: 4px solid #6f4e37;
+  border-right: 4px solid #6f4e37;
+  background: #fff7ec;
+}
+
+.playArea {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 24px;
+}
+
+@media (max-width: 720px) {
+  .gameShell {
+    border: 0;
+  }
+
+  .playArea {
+    padding: 16px;
+  }
+}

@@ -1,0 +1,17 @@
+.spriteWrap {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: end center;
+  image-rendering: pixelated;
+}
+
+.catImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  user-select: none;
+}

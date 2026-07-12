@@ -1,0 +1,59 @@
+.panel {
+  padding: 16px;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.panelHeader h2,
+.inventoryItem h3 {
+  margin: 0;
+  color: #4b3829;
+}
+
+.panelHeader p,
+.inventoryItem p,
+.emptyState {
+  margin: 0;
+  color: #765948;
+}
+
+.itemList {
+  display: grid;
+  gap: 10px;
+}
+
+.inventoryItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 3px solid #b6845e;
+  background: #fff1df;
+}
+
+.inventoryItem p {
+  margin-top: 4px;
+  font-size: 0.875rem;
+}
+
+.inventoryItem button {
+  min-width: 80px;
+  border: 3px solid #6f4e37;
+  background: #b7d991;
+  color: #34432a;
+  padding: 8px 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.inventoryItem button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}

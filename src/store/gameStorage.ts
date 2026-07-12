@@ -1,0 +1,36 @@
+import type { GameState } from '../types/game';
+
+const STORAGE_KEY = 'mew-mew-room-save-v1';
+
+export type PersistedGameState = Pick<
+  GameState,
+  'coins' | 'inventory' | 'placedFurniture'
+>;
+
+export function loadGameState(): Partial<PersistedGameState> {
+  try {
+    const rawSave = window.localStorage.getItem(STORAGE_KEY);
+
+    if (!rawSave) {
+      return {};
+    }
+
+    return JSON.parse(rawSave) as PersistedGameState;
+  } catch {
+    return {};
+  }
+}
+
+export function saveGameState(state: GameState) {
+  const saveData: PersistedGameState = {
+    coins: state.coins,
+    inventory: state.inventory,
+    placedFurniture: state.placedFurniture,
+  };
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+}
+
+export function clearGameState() {
+  window.localStorage.removeItem(STORAGE_KEY);
+}

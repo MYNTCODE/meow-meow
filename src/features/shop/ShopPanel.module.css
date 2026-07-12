@@ -1,0 +1,120 @@
+.panel {
+  padding: 16px;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.panelHeader h2,
+.itemCopy h3 {
+  margin: 0;
+  color: #4b3829;
+}
+
+.panelHeader p,
+.itemCopy p {
+  margin: 0;
+  color: #765948;
+}
+
+.itemList {
+  display: grid;
+  gap: 10px;
+}
+
+.shopItem {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 3px solid #b6845e;
+  background: #fff1df;
+}
+
+.itemPreview {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  image-rendering: pixelated;
+}
+
+.itemPreview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.itemPreview span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 4px solid #7b4b58;
+  background: #d98a9c;
+}
+
+.itemPreview span::after {
+  content: "";
+  display: block;
+  width: 68%;
+  height: 6px;
+  margin: 6px auto 0;
+  background: #efb1bd;
+}
+
+.itemCopy {
+  min-width: 0;
+}
+
+.itemCopy h3 {
+  font-size: 1rem;
+}
+
+.itemCopy p {
+  margin-top: 4px;
+  font-size: 0.875rem;
+}
+
+.itemCopy strong {
+  display: block;
+  margin-top: 6px;
+  color: #8a5a1f;
+  font-size: 0.875rem;
+}
+
+.shopItem button {
+  min-width: 72px;
+  border: 3px solid #6f4e37;
+  background: #f2c66d;
+  color: #4b3829;
+  padding: 8px 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.shopItem button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 560px) {
+  .panelHeader {
+    display: block;
+  }
+
+  .shopItem {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .shopItem button {
+    grid-column: 1 / -1;
+  }
+}

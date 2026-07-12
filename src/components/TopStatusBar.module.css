@@ -1,0 +1,18 @@
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 20px;
+  border-bottom: 4px solid #6f4e37;
+  background: #ffe6c9;
+}
+
+.statusBar h1 {
+  margin: 0;
+  color: #4b3829;
+  font-size: 1.125rem;
+  letter-spacing: 0;
+}

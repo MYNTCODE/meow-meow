@@ -1,0 +1,84 @@
+.roomStack {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.roomFrame {
+  position: relative;
+  width: min(100%, 720px);
+  aspect-ratio: 4 / 3;
+  border: 4px solid #6f4e37;
+  background: #f6d9bd;
+  image-rendering: pixelated;
+  overflow: hidden;
+}
+
+.debugToggle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  border: 3px solid #4b3829;
+  background: #fff7ec;
+  color: #4b3829;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 21;
+}
+
+.roomImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.wall {
+  position: absolute;
+  inset: 0 0 34%;
+  background-color: #f7d6cc;
+  background-image:
+    linear-gradient(#ebbaae 2px, transparent 2px),
+    linear-gradient(90deg, #ebbaae 2px, transparent 2px);
+  background-size: 48px 48px;
+}
+
+.window {
+  position: absolute;
+  top: 34px;
+  right: 52px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 92px;
+  height: 68px;
+  border: 4px solid #6f4e37;
+  background: #b7dce0;
+}
+
+.window span {
+  border-right: 3px solid #6f4e37;
+}
+
+.window span + span {
+  border-right: 0;
+}
+
+.floor {
+  position: absolute;
+  inset: 58% 0 0;
+  background-color: #e6b985;
+  background-image: linear-gradient(90deg, #cf9b64 2px, transparent 2px);
+  background-size: 72px 100%;
+}
+
+.objectLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}

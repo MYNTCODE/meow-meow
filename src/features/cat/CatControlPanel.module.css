@@ -1,0 +1,46 @@
+.panel {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 720px);
+  min-height: 92px;
+  border: 3px solid #6f4e37;
+  background: #fff7ec;
+  padding: 10px;
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  color: #5f4534;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.statusGrid span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hints span {
+  border: 3px solid #6f4e37;
+  background: #ffe6c9;
+  color: #4b3829;
+  padding: 7px 10px;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+@media (max-width: 680px) {
+  .statusGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

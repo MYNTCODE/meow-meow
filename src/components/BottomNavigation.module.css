@@ -1,0 +1,28 @@
+.nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  border-top: 4px solid #6f4e37;
+  background: #ffe6c9;
+}
+
+.nav button {
+  min-height: 58px;
+  border: 0;
+  border-right: 3px solid #d2a076;
+  background: transparent;
+  color: #5f4534;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nav button:last-child {
+  border-right: 0;
+}
+
+.nav button:hover,
+.nav button:focus-visible,
+.nav .active {
+  background: #f2c66d;
+  color: #3d2a1f;
+}

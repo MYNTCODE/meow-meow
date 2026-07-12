@@ -1,0 +1,9 @@
+.panelWrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 58px;
+  border-top: 4px solid #6f4e37;
+  background: #fff7ec;
+  z-index: 10;
+}

@@ -1,0 +1,85 @@
+.debugOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.bounds,
+.catCollision,
+.solidFurnitureCollision,
+.passableFurnitureCollision,
+.interactionRange {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.bounds {
+  border: 2px dashed #257c45;
+  background: rgba(37, 124, 69, 0.08);
+}
+
+.point,
+.anchor,
+.depthAnchor,
+.catDepthAnchor {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+}
+
+.point {
+  border: 2px solid #2463eb;
+  background: #f8fbff;
+}
+
+.anchor {
+  border: 2px solid #e23b3b;
+  background: #ffd6d6;
+}
+
+.depthAnchor {
+  border: 2px solid #a16207;
+  background: #fff7cc;
+}
+
+.catDepthAnchor {
+  border: 2px solid #16a34a;
+  background: #dcfce7;
+}
+
+.catCollision {
+  border: 2px solid #e23b3b;
+  background: rgba(226, 59, 59, 0.12);
+}
+
+.solidFurnitureCollision {
+  border: 2px dashed #a16207;
+  background: transparent;
+}
+
+.passableFurnitureCollision {
+  border: 2px dashed #a16207;
+  background: transparent;
+}
+
+.interactionRange {
+  border: 2px dotted #0891b2;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.readout {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  display: grid;
+  gap: 4px;
+  border: 3px solid #4b3829;
+  background: #fff7ec;
+  color: #4b3829;
+  padding: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}

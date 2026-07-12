@@ -1,0 +1,22 @@
+.actor {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.debugOutline {
+  outline: 2px solid #e23b3b;
+  outline-offset: 2px;
+}
+
+.anchorPoint {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  background: #e23b3b;
+  transform: translate(-50%, 50%);
+}
