@@ -33,6 +33,11 @@ function clonePlacedFurniture(placedFurniture: PlacedFurniture[]) {
     placement: {
       ...item.placement,
     },
+    interactionState: item.interactionState
+      ? {
+          ...item.interactionState,
+        }
+      : undefined,
   }));
 }
 

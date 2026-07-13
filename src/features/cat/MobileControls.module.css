@@ -24,19 +24,18 @@
     --control-disabled-base: #d8ccbb;
     --control-disabled-icon: #9a8b79;
     --control-base-depth: 5px;
-    --control-key-size: 58px;
+    --control-key-size: 54px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     width: min(100%, 720px);
     max-width: 100%;
     padding:
       8px max(12px, env(safe-area-inset-right))
       max(12px, env(safe-area-inset-bottom))
       max(12px, env(safe-area-inset-left));
-    touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     box-sizing: border-box;
@@ -221,7 +220,7 @@
 @media (pointer: coarse) and (max-width: 420px) {
   .wrap,
   .mobileControls {
-    --control-key-size: 56px;
+    --control-key-size: 52px;
   }
 
   .mobileDpad {
@@ -229,6 +228,6 @@
   }
 
   .interactButton {
-    min-width: 112px;
+    min-width: 106px;
   }
 }

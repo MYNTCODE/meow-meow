@@ -128,6 +128,13 @@ export function useCatInputControls({
     setDirectionInput(mergeDirectionInputState(inputSourcesRef.current));
   }, []);
 
+  const clearMovementInput = useCallback(() => {
+    inputSourcesRef.current = createEmptySources();
+    setDirectionInput(EMPTY_DIRECTION_INPUT_STATE);
+    setTouchPressedState(EMPTY_DIRECTION_INPUT_STATE);
+    syncDirectionInput();
+  }, [syncDirectionInput]);
+
   const clearSource = useCallback(
     (source: InputSource) => {
       inputSourcesRef.current[source] = cloneEmptyDirectionInputState();
@@ -370,6 +377,7 @@ export function useCatInputControls({
 
   return {
     directionInput,
+    clearMovementInput,
     touchControls: {
       bindDirectionButton: createDirectionButtonBinding,
       interactButton: interactButtonBinding,

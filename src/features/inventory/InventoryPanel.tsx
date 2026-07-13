@@ -7,11 +7,7 @@ export function InventoryPanel() {
 
   return (
     <section className={styles.panel} aria-label="Inventory">
-      <div className={styles.panelHeader}>
-        <h2>Inventory</h2>
-        <p>Place owned furniture in the room.</p>
-      </div>
-
+      <p className={styles.panelIntro}>Place owned furniture in the room.</p>
       {state.inventory.length === 0 ? (
         <p className={styles.emptyState}>No furniture yet.</p>
       ) : (

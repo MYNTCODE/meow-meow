@@ -1,6 +1,6 @@
 .nav {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   width: 100%;
   border-top: 4px solid #6f4e37;
   background: #ffe6c9;
@@ -17,13 +17,30 @@
   cursor: pointer;
 }
 
+@media (pointer: coarse) and (max-width: 720px) {
+  .nav button {
+    min-height: 52px;
+  }
+}
+
 .nav button:last-child {
   border-right: 0;
 }
 
-.nav button:hover,
-.nav button:focus-visible,
 .nav .active {
   background: #f2c66d;
   color: #3d2a1f;
+}
+
+.nav button:hover {
+  color: #3d2a1f;
+}
+
+.nav button:focus-visible {
+  outline: 2px solid #3d2a1f;
+  outline-offset: -4px;
+}
+
+.nav button:active {
+  background: transparent;
 }

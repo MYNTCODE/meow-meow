@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { getFurnitureAsset } from '../../data/assets';
+import { CAT_BALL_PLAY_OFFSETS, type PlayFrameIndex } from '../cat/playAnimation';
+import { getFurnitureAssetForPlacement } from '../../data/assets';
 import { getFurnitureItem } from '../../data/furniture';
 import type { PlacedFurniture } from '../../types/game';
 import type { FurnitureDragBindings } from '../../hooks/useFurnitureDrag';
+import { getFurnitureRenderScale } from '../../utils/collision';
 import styles from './FurnitureSprite.module.css';
 
 interface FurnitureSpriteProps {
@@ -10,6 +12,8 @@ interface FurnitureSpriteProps {
   renderOrder: number;
   dragBindings: FurnitureDragBindings;
   isInvalid: boolean;
+  isPlayingTarget: boolean;
+  playFrameIndex: PlayFrameIndex;
 }
 
 export function FurnitureSprite({
@@ -17,6 +21,8 @@ export function FurnitureSprite({
   renderOrder,
   dragBindings,
   isInvalid,
+  isPlayingTarget,
+  playFrameIndex,
 }: FurnitureSpriteProps) {
   const [assetFailed, setAssetFailed] = useState(false);
   const furniture = getFurnitureItem(placedFurniture.furnitureId);
@@ -26,8 +32,12 @@ export function FurnitureSprite({
   }
 
   const placement = dragBindings.placement ?? placedFurniture.placement;
-  const assetPath = getFurnitureAsset(furniture.assetKey);
+  const scale = getFurnitureRenderScale(furniture);
+  const assetPath = getFurnitureAssetForPlacement(furniture, placedFurniture);
   const aspectRatio = `${furniture.sourceWidth} / ${furniture.sourceHeight}`;
+  const shouldWiggle =
+    furniture.id === 'cat-ball' && isPlayingTarget && !dragBindings.isDragging;
+  const playBallOffset = shouldWiggle ? CAT_BALL_PLAY_OFFSETS[playFrameIndex] : undefined;
 
   return (
     <div
@@ -35,7 +45,7 @@ export function FurnitureSprite({
       style={{
         left: `${placement.x}%`,
         top: `${placement.y}%`,
-        width: `${placement.width}%`,
+        width: `${placement.width * scale}%`,
         aspectRatio,
         zIndex: dragBindings.isDragging ? 1000 : renderOrder,
       }}
@@ -43,15 +53,26 @@ export function FurnitureSprite({
       onPointerDown={dragBindings.onPointerDown}
     >
       {!assetFailed ? (
-        <img
-          className={styles.furnitureImage}
-          src={assetPath}
-          alt=""
-          draggable="false"
-          onError={() => setAssetFailed(true)}
-        />
+        <span
+          className={styles.spriteWrap}
+          style={
+            playBallOffset
+              ? {
+                  transform: `translateX(${playBallOffset.translateX}px) rotate(${playBallOffset.rotation}deg)`,
+                }
+              : undefined
+          }
+        >
+          <img
+            className={styles.furnitureImage}
+            src={assetPath}
+            alt=""
+            draggable="false"
+            onError={() => setAssetFailed(true)}
+          />
+        </span>
       ) : (
-        <span />
+        <span className={styles.fallbackBlock} />
       )}
     </div>
   );

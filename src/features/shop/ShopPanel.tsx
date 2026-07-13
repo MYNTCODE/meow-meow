@@ -35,11 +35,7 @@ export function ShopPanel() {
 
   return (
     <section className={styles.panel} aria-label="Furniture shop">
-      <div className={styles.panelHeader}>
-        <h2>Shop</h2>
-        <p>Furniture for a warmer room.</p>
-      </div>
-
+      <p className={styles.panelIntro}>Furniture for a warmer room.</p>
       <div className={styles.itemList}>
         {FURNITURE_ITEMS.map((item) => {
           const canAfford = state.coins >= item.price;

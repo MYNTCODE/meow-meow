@@ -1,5 +1,5 @@
 import type { PlacedFurniture } from '../types/game';
-
+import { getRoomContentRect, screenToRoomPoint } from './roomCoordinates';
 export type FurniturePlacementInvalidReason =
   | 'outside-room'
   | 'overlaps-furniture'
@@ -21,10 +21,9 @@ export function pointerToRoomCoordinates(
   clientX: number,
   clientY: number,
 ): RoomPointerCoordinates {
-  const rect = roomElement.getBoundingClientRect();
-
-  return {
-    x: ((clientX - rect.left) / rect.width) * 100,
-    y: ((clientY - rect.top) / rect.height) * 100,
-  };
+  return screenToRoomPoint(
+    getRoomContentRect(roomElement),
+    clientX,
+    clientY,
+  );
 }

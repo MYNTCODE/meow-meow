@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCatAsset } from '../../data/assets';
+import type { PlayFrameIndex } from './playAnimation';
 import type {
   CatBehaviorState,
   CatSpriteKey,
@@ -9,10 +10,11 @@ import type {
 import styles from './CatSprite.module.css';
 
 const WALK_FRAME_MS = 220;
-
+const EAT_FRAME_MS = 300;
 interface CatSpriteProps {
   behaviorState: CatBehaviorState;
   facingDirection: FacingDirection;
+  playFrameIndex?: PlayFrameIndex;
   sourceWidth: number;
   sourceHeight: number;
   variant: CatVariant;
@@ -21,6 +23,14 @@ interface CatSpriteProps {
 function getSpriteKey(behaviorState: CatBehaviorState, walkFrame: 0 | 1): CatSpriteKey {
   if (behaviorState === 'walking') {
     return walkFrame === 0 ? 'walk1' : 'walk2';
+  }
+
+  if (behaviorState === 'eating') {
+    return walkFrame === 0 ? 'eat1' : 'eat2';
+  }
+
+  if (behaviorState === 'playing') {
+    return walkFrame === 0 ? 'play1' : 'play2';
   }
 
   if (behaviorState === 'resting') {
@@ -33,6 +43,7 @@ function getSpriteKey(behaviorState: CatBehaviorState, walkFrame: 0 | 1): CatSpr
 export function CatSprite({
   behaviorState,
   facingDirection,
+  playFrameIndex,
   sourceWidth,
   sourceHeight,
   variant,
@@ -42,22 +53,39 @@ export function CatSprite({
     {},
   );
   const idleAsset = getCatAsset(variant, 'idle');
-  const spriteKey = getSpriteKey(behaviorState, walkFrame);
-  const spriteAsset = failedSprites[spriteKey] ? idleAsset : getCatAsset(variant, spriteKey);
+  const spriteFrameIndex = behaviorState === 'playing' ? (playFrameIndex ?? 0) : walkFrame;
+  const spriteKey = getSpriteKey(behaviorState, spriteFrameIndex);
+  const fallbackSpriteKey =
+    behaviorState === 'eating'
+      ? spriteKey === 'eat1'
+        ? 'eat2'
+        : 'eat1'
+      : behaviorState === 'playing'
+        ? spriteKey === 'play1'
+          ? 'play2'
+          : 'play1'
+        : 'idle';
+  const spriteAsset = failedSprites[spriteKey]
+    ? failedSprites[fallbackSpriteKey]
+      ? idleAsset
+      : getCatAsset(variant, fallbackSpriteKey)
+    : getCatAsset(variant, spriteKey);
   const aspectRatio = useMemo(
     () => `${sourceWidth} / ${sourceHeight}`,
     [sourceHeight, sourceWidth],
   );
 
   useEffect(() => {
-    if (behaviorState !== 'walking') {
+    if (
+      behaviorState !== 'walking' && behaviorState !== 'eating'
+    ) {
       setWalkFrame(0);
       return undefined;
     }
 
     const intervalId = window.setInterval(() => {
       setWalkFrame((currentFrame) => (currentFrame === 0 ? 1 : 0));
-    }, WALK_FRAME_MS);
+    }, behaviorState === 'eating' ? EAT_FRAME_MS : WALK_FRAME_MS);
 
     return () => window.clearInterval(intervalId);
   }, [behaviorState]);
