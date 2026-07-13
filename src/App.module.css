@@ -20,6 +20,19 @@
   overflow-x: hidden;
 }
 
+.footer {
+  padding:
+    28px max(12px, env(safe-area-inset-right))
+    calc(18px + env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+  color: rgb(95 69 52 / 76%);
+  font-size: 0.78125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-align: center;
+  text-shadow: 1px 1px 0 rgb(255 247 236 / 60%);
+}
+
 @media (max-width: 720px) {
   .gameShell {
     border: 0;
@@ -29,5 +42,13 @@
     padding:
       12px max(10px, env(safe-area-inset-right))
       8px max(10px, env(safe-area-inset-left));
+  }
+
+  .footer {
+    padding:
+      24px max(10px, env(safe-area-inset-right))
+      calc(16px + env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    font-size: 0.75rem;
   }
 }
