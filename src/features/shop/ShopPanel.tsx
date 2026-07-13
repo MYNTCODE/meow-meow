@@ -1,8 +1,9 @@
 import { useState } from 'react';
+
 import { getFurnitureAsset } from '../../data/assets';
 import { FURNITURE_ITEMS } from '../../data/furniture';
-import type { FurnitureItem } from '../../types/game';
 import { useGame } from '../../store/GameContext';
+import type { FurnitureItem } from '../../types/game';
 import styles from './ShopPanel.module.css';
 
 function ShopItemPreview({ item }: { item: FurnitureItem }) {
@@ -38,23 +39,38 @@ export function ShopPanel() {
       <p className={styles.panelIntro}>Furniture for a warmer room.</p>
       <div className={styles.itemList}>
         {FURNITURE_ITEMS.map((item) => {
-          const canAfford = state.coins >= item.price;
+          const isOwned = state.inventory.some((inventoryItem) => inventoryItem.furnitureId === item.id);
+          const isInRoom = state.equippedItems[item.slot] === item.id;
+          const canAfford = !isOwned && state.coins >= item.price;
+          const actionLabel = isInRoom ? 'In Room' : isOwned ? '✓ Owned' : 'Buy';
+          const actionClassName =
+            isInRoom ? styles.inRoomBadge : isOwned ? styles.ownedButton : undefined;
 
           return (
             <article className={styles.shopItem} key={item.id}>
-              <ShopItemPreview item={item} />
-              <div className={styles.itemCopy}>
-                <h3>{item.name}</h3>
-                <p>{item.description}</p>
-                <strong>{item.price} coins</strong>
+              <div className={styles.itemThumbnail}>
+                <ShopItemPreview item={item} />
               </div>
-              <button
-                type="button"
-                disabled={!canAfford}
-                onClick={() => dispatch({ type: 'buyFurniture', furnitureId: item.id })}
-              >
-                Buy
-              </button>
+              <div className={styles.itemContent}>
+                <div className={styles.itemCopy}>
+                  <h3 className={styles.itemName}>{item.name}</h3>
+                  <p className={styles.itemDescription}>{item.description}</p>
+                  <strong className={styles.itemPrice}>{item.price} coins</strong>
+                </div>
+              </div>
+              <div className={styles.shopItemAction}>
+                {isOwned ? (
+                  <span className={actionClassName}>{actionLabel}</span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={!canAfford}
+                    onClick={() => dispatch({ type: 'buyFurniture', furnitureId: item.id })}
+                  >
+                    {actionLabel}
+                  </button>
+                )}
+              </div>
             </article>
           );
         })}
