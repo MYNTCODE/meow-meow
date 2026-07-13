@@ -1,7 +1,7 @@
 .display,
 .editor {
   display: inline-flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 6px;
   align-items: center;
 }
@@ -15,7 +15,7 @@
   min-width: 0;
   overflow: hidden;
   color: #4b3829;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 900;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -95,7 +95,7 @@
   }
 
   .roomName {
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 
   .editButton {

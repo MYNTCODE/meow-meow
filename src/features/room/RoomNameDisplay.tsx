@@ -32,16 +32,6 @@ export function RoomNameDisplay() {
       <strong className={styles.roomName} title={state.roomName}>
         {state.roomName}
       </strong>
-      {/*
-      <button
-        type="button"
-        className={styles.editButton}
-        aria-label="Edit room name"
-        onClick={() => setIsEditing(true)}
-      >
-        Edit
-      </button>
-      */}
     </div>
   );
 }
