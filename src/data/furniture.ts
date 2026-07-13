@@ -28,7 +28,7 @@ export const FURNITURE_ITEMS: FurnitureItem[] = [
       catOffsetX: 0,
       catOffsetY: -1.6,
       catFacingDirection: 'right',
-      catRenderOffsetY: -26,
+      catRenderOffsetY: -16,
     },
     collision: {
       solid: true,
@@ -65,7 +65,7 @@ export const FURNITURE_ITEMS: FurnitureItem[] = [
       catOffsetX: 0,
       catOffsetY: -1.6,
       catFacingDirection: 'right',
-      catRenderOffsetY: -26,
+      catRenderOffsetY: -16,
     },
     collision: {
       solid: true,

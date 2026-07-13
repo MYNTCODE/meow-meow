@@ -1,6 +1,5 @@
 import { BottomNavigation } from './components/BottomNavigation';
 import { BottomPanel } from './components/BottomPanel';
-import { DevResetButton } from './components/DevResetButton';
 import { TopStatusBar } from './components/TopStatusBar';
 import { RoomView } from './features/room/RoomView';
 import { useCoinIncome } from './hooks/useCoinIncome';
@@ -33,7 +32,6 @@ export default function App() {
         <RoomView state={state} dispatch={dispatch} />
         <BottomPanel openPanel={state.openPanel} onRequestClose={closePanel} />
       </section>
-      <DevResetButton />
       <BottomNavigation
         openPanel={state.openPanel}
         onSelectPanel={handleNavigation}
