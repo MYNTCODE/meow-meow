@@ -1,0 +1,92 @@
+.wrap {
+  display: none;
+}
+
+@media (pointer: fine) {
+  .wrap {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px 16px;
+    width: min(100%, 720px);
+    padding:
+      8px max(0px, env(safe-area-inset-right))
+      0 max(0px, env(safe-area-inset-left));
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .mobileDpad {
+    display: grid;
+    grid-template-columns: repeat(3, 52px);
+    grid-template-rows: repeat(2, 52px);
+    gap: 6px;
+  }
+
+  .button {
+    width: 52px;
+    height: 52px;
+    border: 3px solid #6f4e37;
+    background: #fff7ec;
+    color: #4b3829;
+    padding: 0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+    touch-action: none;
+  }
+
+  .pressed {
+    background: #f2c66d;
+    transform: translateY(1px);
+  }
+
+  .upSlot {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .leftSlot {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .downSlot {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .rightSlot {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .interactButton {
+    width: auto;
+    min-width: 96px;
+    height: 52px;
+    padding: 0 14px;
+  }
+}
+
+@media (pointer: coarse) and (max-width: 420px) {
+  .wrap {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobileDpad {
+    grid-template-columns: repeat(3, 50px);
+    grid-template-rows: repeat(2, 50px);
+    gap: 5px;
+  }
+}

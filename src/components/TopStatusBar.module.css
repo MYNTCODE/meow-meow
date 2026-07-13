@@ -3,9 +3,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
   width: 100%;
   min-height: 56px;
-  padding: 0 20px;
+  padding:
+    max(0px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    0 max(20px, env(safe-area-inset-left));
   border-bottom: 4px solid #6f4e37;
   background: #ffe6c9;
 }
@@ -15,27 +18,18 @@
   align-items: center;
   flex: 1 1 auto;
   min-width: 0;
-  max-width: calc(100% - 140px);
+  max-width: 100%;
 }
 
-.statusBar h1 {
-  margin: 0;
-  color: #4b3829;
-  font-size: 1.125rem;
-  letter-spacing: 0;
+.statusBar > :last-child {
+  flex: 0 0 auto;
 }
 
 @media (max-width: 560px) {
   .statusBar {
     gap: 8px;
-    padding: 0 12px;
-  }
-
-  .roomNameGroup {
-    max-width: calc(100% - 92px);
-  }
-
-  .statusBar h1 {
-    font-size: 1rem;
+    padding:
+      max(0px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+      0 max(12px, env(safe-area-inset-left));
   }
 }

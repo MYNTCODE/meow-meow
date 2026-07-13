@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { CatBehaviorSnapshot, CatPressedKeys } from '../types/catBehavior';
+import type { CatBehaviorSnapshot, DirectionInputState } from '../types/catBehavior';
 import { roomWalkableArea } from '../data/roomMovementConfig';
 import type { Cat, PlacedFurniture } from '../types/game';
 import {
@@ -9,9 +9,9 @@ import {
 
 export const CAT_MOVE_SPEED = 18;
 
-function getMovementVector(pressedKeys: CatPressedKeys) {
-  const x = Number(pressedKeys.rightPressed) - Number(pressedKeys.leftPressed);
-  const y = Number(pressedKeys.downPressed) - Number(pressedKeys.upPressed);
+function getMovementVector(directionInput: DirectionInputState) {
+  const x = Number(directionInput.right) - Number(directionInput.left);
+  const y = Number(directionInput.down) - Number(directionInput.up);
   const magnitude = Math.hypot(x, y);
 
   if (magnitude === 0) {
@@ -25,7 +25,7 @@ function getMovementVector(pressedKeys: CatPressedKeys) {
 }
 
 interface UseContinuousCatMovementOptions {
-  pressedKeys: CatPressedKeys;
+  directionInput: DirectionInputState;
   behavior: CatBehaviorSnapshot;
   setBehavior: React.Dispatch<React.SetStateAction<CatBehaviorSnapshot>>;
   cat: Cat;
@@ -35,7 +35,7 @@ interface UseContinuousCatMovementOptions {
 }
 
 export function useContinuousCatMovement({
-  pressedKeys,
+  directionInput,
   behavior,
   setBehavior,
   cat,
@@ -46,7 +46,7 @@ export function useContinuousCatMovement({
   const animationFrameRef = useRef<number | undefined>(undefined);
   const lastFrameTimeRef = useRef<number | undefined>(undefined);
   const behaviorRef = useRef(behavior);
-  const pressedKeysRef = useRef(pressedKeys);
+  const directionInputRef = useRef(directionInput);
   const placedFurnitureRef = useRef(placedFurniture);
 
   useEffect(() => {
@@ -54,8 +54,8 @@ export function useContinuousCatMovement({
   }, [behavior]);
 
   useEffect(() => {
-    pressedKeysRef.current = pressedKeys;
-  }, [pressedKeys]);
+    directionInputRef.current = directionInput;
+  }, [directionInput]);
 
   useEffect(() => {
     placedFurnitureRef.current = placedFurniture;
@@ -88,8 +88,8 @@ export function useContinuousCatMovement({
 
     const shouldMove =
       behavior.state !== 'resting' &&
-      (pressedKeys.leftPressed !== pressedKeys.rightPressed ||
-        pressedKeys.upPressed !== pressedKeys.downPressed);
+      (directionInput.left !== directionInput.right ||
+        directionInput.up !== directionInput.down);
 
     if (!shouldMove) {
       cancelMovementFrame();
@@ -112,7 +112,7 @@ export function useContinuousCatMovement({
     }
 
     function moveCat(frameTime: number) {
-      const currentKeys = pressedKeysRef.current;
+      const currentKeys = directionInputRef.current;
       const currentBehavior = behaviorRef.current;
       const movementVector = getMovementVector(currentKeys);
       const isMoving = movementVector.x !== 0 || movementVector.y !== 0;
@@ -188,10 +188,10 @@ export function useContinuousCatMovement({
     behavior.state,
     disabled,
     cat,
-    pressedKeys.leftPressed,
-    pressedKeys.downPressed,
-    pressedKeys.rightPressed,
-    pressedKeys.upPressed,
+    directionInput.left,
+    directionInput.down,
+    directionInput.right,
+    directionInput.up,
     setBehavior,
     setMovementBlocked,
   ]);
