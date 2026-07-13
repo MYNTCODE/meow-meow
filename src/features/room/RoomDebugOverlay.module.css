@@ -24,6 +24,8 @@
 .depthAnchor,
 .catDepthAnchor,
 .floorAnchor,
+.placementShadowFloor,
+.placementShadowWall,
 .interactionAnchor,
 .restTarget,
 .eatAnchor,
@@ -38,6 +40,22 @@
 .point {
   border: 2px solid #2463eb;
   background: #f8fbff;
+}
+
+.placementShadowFloor {
+  width: 44px;
+  height: 14px;
+  border: 2px dashed #5e3c01;
+  border-radius: 999px;
+  background: rgb(245 158 11 / 18%);
+}
+
+.placementShadowWall {
+  width: 28px;
+  height: 28px;
+  border: 2px dashed #fb7185;
+  border-radius: 999px;
+  background: rgb(251 113 133 / 14%);
 }
 
 .anchor {

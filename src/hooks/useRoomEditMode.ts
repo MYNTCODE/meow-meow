@@ -7,10 +7,12 @@ import {
   type RefObject,
   type SetStateAction,
 } from 'react';
+import { getFurnitureItem } from '../data/furniture';
+import { getRoomPlacementAnchors } from '../data/roomSlots';
 import { useFurnitureDrag } from './useFurnitureDrag';
 import type { CatBehaviorSnapshot } from '../types/catBehavior';
 import type { GameAction } from '../store/gameReducer';
-import type { Cat, PlacedFurniture } from '../types/game';
+import type { Cat, FurnitureId, ItemSlot, PlacedFurniture } from '../types/game';
 import type { FurniturePlacementInvalidReason } from '../utils/furnitureDrag';
 import { validateRoomLayout } from '../utils/roomLayout';
 
@@ -19,9 +21,11 @@ interface UseRoomEditModeOptions {
   catPosition: CatBehaviorSnapshot;
   dispatch: Dispatch<GameAction>;
   isEditing: boolean;
+  onPlacementSelectionHandled: () => void;
   placedFurniture: PlacedFurniture[];
   roomRef: RefObject<HTMLElement | null>;
-  setIsEditing: Dispatch<SetStateAction<boolean>>;
+  selectedPlacementFurnitureId: FurnitureId | null;
+  setIsEditing: Dispatch<SetStateAction<boolean>> | ((nextValue: boolean) => void);
 }
 
 const EMPTY_INVALID_IDS = new Set<string>();
@@ -46,8 +50,10 @@ export function useRoomEditMode({
   catPosition,
   dispatch,
   isEditing,
+  onPlacementSelectionHandled,
   placedFurniture,
   roomRef,
+  selectedPlacementFurnitureId,
   setIsEditing,
 }: UseRoomEditModeOptions) {
   const [draftPlacedFurniture, setDraftPlacedFurniture] = useState<PlacedFurniture[]>([]);
@@ -64,6 +70,7 @@ export function useRoomEditMode({
 
   const furnitureDrag = useFurnitureDrag({
     enabled: isEditing,
+    placedFurniture: draftPlacedFurniture,
     roomRef,
     setPlacedFurniture: setDraftPlacedFurniture,
   });
@@ -96,6 +103,79 @@ export function useRoomEditMode({
     setDraftPlacedFurniture([]);
     setIsEditing(false);
   }, [cat, catPosition, dispatch, draftPlacedFurniture, setIsEditing]);
+
+  useEffect(() => {
+    if (!isEditing || !selectedPlacementFurnitureId) {
+      return;
+    }
+
+    const furniture = getFurnitureItem(selectedPlacementFurnitureId);
+
+    if (!furniture) {
+      onPlacementSelectionHandled();
+      return;
+    }
+
+    const anchors = getRoomPlacementAnchors(furniture.slot);
+    const fallbackAnchor = anchors[0];
+
+    if (!fallbackAnchor) {
+      onPlacementSelectionHandled();
+      return;
+    }
+
+    setDraftPlacedFurniture((currentFurniture) => {
+      const existingItem = currentFurniture.find((item) => item.furnitureId === selectedPlacementFurnitureId);
+      const replacedItem = currentFurniture.find((item) => item.positionId === furniture.slot);
+      const previewAnchor =
+        anchors.find((anchor) => {
+          if (!existingItem) {
+            return true;
+          }
+
+          return (
+            Math.abs(existingItem.placement.x - anchor.x) < 0.1 &&
+            Math.abs(existingItem.placement.y - anchor.y) < 0.1
+          );
+        }) ?? fallbackAnchor;
+
+      const nextItem: PlacedFurniture = existingItem ?? {
+        instanceId: `preview:${selectedPlacementFurnitureId}`,
+        furnitureId: selectedPlacementFurnitureId,
+        positionId: furniture.slot,
+        placement: {
+          x: previewAnchor.x,
+          y: previewAnchor.y,
+          width: furniture.placement.width,
+          zIndex: furniture.placement.zIndex,
+        },
+        interactionState:
+          selectedPlacementFurnitureId === 'food-bowl'
+            ? {
+                foodState: 'full',
+              }
+            : undefined,
+      };
+
+      return [
+        ...currentFurniture.filter(
+          (item) =>
+            item.instanceId !== existingItem?.instanceId &&
+            !(item.positionId === furniture.slot && item.instanceId === replacedItem?.instanceId),
+        ),
+        {
+          ...nextItem,
+          placement: {
+            ...nextItem.placement,
+            x: previewAnchor.x,
+            y: previewAnchor.y,
+          },
+        },
+      ];
+    });
+
+    onPlacementSelectionHandled();
+  }, [isEditing, onPlacementSelectionHandled, selectedPlacementFurnitureId]);
 
   useEffect(() => {
     if (!isEditing) {
@@ -136,13 +216,17 @@ export function useRoomEditMode({
     : EMPTY_INVALID_REASONS;
 
   return {
+    activeFurnitureSlot:
+      selectedPlacementFurnitureId ? getFurnitureItem(selectedPlacementFurnitureId)?.slot ?? null : null,
     cancelLayout,
     dragBindings: furnitureDrag.bindings,
     dragDebugState: furnitureDrag.dragDebugState,
     draggingItemId: furnitureDrag.draggingItemId,
     enterEditMode,
+    ghostPreviews: furnitureDrag.ghostPreviews,
     invalidFurnitureIds,
     invalidReasonsById,
+    isNoSpaceAvailable: furnitureDrag.isNoSpaceAvailable,
     isEditing,
     isLayoutValid: !isEditing || layoutValidation.isValid,
     renderedPlacedFurniture,

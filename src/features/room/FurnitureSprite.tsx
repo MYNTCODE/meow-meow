@@ -11,6 +11,7 @@ interface FurnitureSpriteProps {
   placedFurniture: PlacedFurniture;
   renderOrder: number;
   dragBindings: FurnitureDragBindings;
+  isGhost?: boolean;
   isInvalid: boolean;
   isPlayingTarget: boolean;
   playFrameIndex: PlayFrameIndex;
@@ -20,6 +21,7 @@ export function FurnitureSprite({
   placedFurniture,
   renderOrder,
   dragBindings,
+  isGhost = false,
   isInvalid,
   isPlayingTarget,
   playFrameIndex,
@@ -35,13 +37,12 @@ export function FurnitureSprite({
   const scale = getFurnitureRenderScale(furniture);
   const assetPath = getFurnitureAssetForPlacement(furniture, placedFurniture);
   const aspectRatio = `${furniture.sourceWidth} / ${furniture.sourceHeight}`;
-  const shouldWiggle =
-    furniture.id === 'cat-ball' && isPlayingTarget && !dragBindings.isDragging;
+  const shouldWiggle = furniture.id === 'cat-ball' && isPlayingTarget && !dragBindings.isDragging;
   const playBallOffset = shouldWiggle ? CAT_BALL_PLAY_OFFSETS[playFrameIndex] : undefined;
 
   return (
     <div
-      className={`${styles.cushion} ${dragBindings.isEditable ? styles.editable : ''} ${dragBindings.isDragging ? styles.dragging : ''} ${isInvalid ? styles.invalid : ''}`}
+      className={`${styles.cushion} ${dragBindings.isEditable ? styles.editable : ''} ${dragBindings.isDragging ? styles.dragging : ''} ${dragBindings.activeAnchorId ? styles.snapped : ''} ${isGhost ? styles.ghost : ''} ${dragBindings.isNoSpaceAvailable ? styles.noSpace : ''} ${isInvalid ? styles.invalid : ''}`}
       style={{
         left: `${placement.x}%`,
         top: `${placement.y}%`,
