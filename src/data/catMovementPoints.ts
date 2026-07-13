@@ -16,8 +16,8 @@ export const catMovementPoints: CatMovementPoint[] = [
     facingDirection: 'right',
   },
   {
-    id: 'floor-center',
-    x: 50,
+    id: 'bed',
+    x: 45,
     y: 82,
     facingDirection: 'right',
   },
@@ -28,15 +28,29 @@ export const catMovementPoints: CatMovementPoint[] = [
     facingDirection: 'left',
   },
   {
+    id: 'food',
+    x: 31,
+    y: 82,
+    facingDirection: 'right',
+    furnitureSlotId: 'food',
+  },
+  {
+    id: 'toy',
+    x: 68,
+    y: 84,
+    facingDirection: 'left',
+    furnitureSlotId: 'toy',
+  },
+  {
     id: 'cushion-rest',
-    x: 50,
+    x: 45,
     y: 73,
     facingDirection: 'right',
-    furnitureSlotId: 'floor-center',
+    furnitureSlotId: 'bed',
   },
 ];
 
-export const DEFAULT_CAT_MOVEMENT_POINT_ID = 'floor-center';
+export const DEFAULT_CAT_MOVEMENT_POINT_ID = 'bed';
 
 export function getCatMovementPoint(pointId: string) {
   return catMovementPoints.find((point) => point.id === pointId);

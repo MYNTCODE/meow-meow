@@ -30,10 +30,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     saveGameState(state);
-  }, [state.coins, state.inventory, state.placedFurniture, state]);
+  }, [state.coins, state.equippedItems, state.inventory, state.placedFurniture, state]);
 
   useEffect(() => {
-    if (state.coins === 20 && state.inventory.length === 0 && state.placedFurniture.length === 0) {
+    if (
+      state.coins === 20 &&
+      state.inventory.length === 0 &&
+      state.placedFurniture.length === 0 &&
+      Object.keys(state.equippedItems).length === 0
+    ) {
       clearGameState();
     }
   }, [state]);

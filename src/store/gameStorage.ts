@@ -1,11 +1,13 @@
-import type { GameState } from '../types/game';
+import type { EquippedItems, FurnitureId, GameState } from '../types/game';
 
 const STORAGE_KEY = 'mew-mew-room-save-v1';
 
 export type PersistedGameState = Pick<
   GameState,
-  'coins' | 'roomName' | 'inventory' | 'placedFurniture'
->;
+  'coins' | 'roomName' | 'inventory' | 'equippedItems' | 'placedFurniture'
+> & {
+  activeItemId?: FurnitureId | null;
+};
 
 export function loadGameState(): Partial<PersistedGameState> {
   try {
@@ -26,6 +28,7 @@ export function saveGameState(state: GameState) {
     coins: state.coins,
     roomName: state.roomName,
     inventory: state.inventory,
+    equippedItems: state.equippedItems,
     placedFurniture: state.placedFurniture,
   };
 

@@ -1,6 +1,8 @@
 export type FurnitureId = 'cat-cushion' | 'cat-cushion-pink' | 'food-bowl' | 'cat-ball';
 
 export type FurnitureCategory = 'comfort' | 'cushion' | 'food' | 'toy';
+export type ItemSlot = 'bed' | 'toy' | 'food' | 'window' | 'wallDecor' | 'floorDecor';
+export type EquippedItems = Partial<Record<ItemSlot, FurnitureId>>;
 
 export type FurnitureAssetKey =
   | 'catCushion'
@@ -135,14 +137,13 @@ export interface FurnitureItem {
   description: string;
   price: number;
   category: FurnitureCategory;
+  slot: ItemSlot;
   assetKey: FurnitureAssetKey;
   draggable?: boolean;
   sourceWidth: number;
   sourceHeight: number;
   placement: {
-    positionId: string;
-    x: number;
-    y: number;
+    positionId: ItemSlot;
     width: number;
     zIndex: number;
   };
@@ -167,7 +168,7 @@ export interface InventoryItem {
 export interface PlacedFurniture {
   instanceId: string;
   furnitureId: FurnitureId;
-  positionId: string;
+  positionId: ItemSlot;
   placement: FurniturePlacement;
   interactionState?: {
     foodState?: FoodBowlState;
@@ -179,6 +180,7 @@ export interface GameState {
   roomName: string;
   cat: Cat;
   inventory: InventoryItem[];
+  equippedItems: EquippedItems;
   placedFurniture: PlacedFurniture[];
   openPanel: OpenPanel;
 }
