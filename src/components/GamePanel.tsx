@@ -11,6 +11,7 @@ const PANEL_ANIMATION_MS = 200;
 
 interface GamePanelProps extends PropsWithChildren {
   isOpen: boolean;
+  isWide?: boolean;
   title: string;
   onRequestClose: () => void;
 }
@@ -27,7 +28,7 @@ function getFocusableElements(container: HTMLElement | null) {
   ).filter((element) => !element.hasAttribute('disabled') && !element.getAttribute('aria-hidden'));
 }
 
-export function GamePanel({ isOpen, title, onRequestClose, children }: GamePanelProps) {
+export function GamePanel({ isOpen, isWide = false, title, onRequestClose, children }: GamePanelProps) {
   const [isMounted, setIsMounted] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(isOpen);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -153,7 +154,7 @@ export function GamePanel({ isOpen, title, onRequestClose, children }: GamePanel
       />
       <section
         ref={panelRef}
-        className={`${styles.panel} ${isVisible ? styles.panelVisible : ''}`}
+        className={`${styles.panel} ${isWide ? styles.panelWide : ''} ${isVisible ? styles.panelVisible : ''}`}
         aria-label={title}
         aria-modal="true"
         role="dialog"
