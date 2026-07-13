@@ -11,6 +11,7 @@ type InputSource = 'keyboard' | 'touch';
 
 interface DirectionButtonBinding {
   isPressed: boolean;
+  disabled: boolean;
   onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => void;
   onPointerUp: (event: ReactPointerEvent<HTMLButtonElement>) => void;
   onPointerCancel: (event: ReactPointerEvent<HTMLButtonElement>) => void;
@@ -19,6 +20,7 @@ interface DirectionButtonBinding {
 
 interface InteractButtonBinding {
   isPressed: boolean;
+  disabled: boolean;
   onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => void;
   onPointerUp: (event: ReactPointerEvent<HTMLButtonElement>) => void;
   onPointerCancel: (event: ReactPointerEvent<HTMLButtonElement>) => void;
@@ -312,6 +314,7 @@ export function useCatInputControls({
   const createDirectionButtonBinding = useCallback(
     (direction: DirectionKey): DirectionButtonBinding => ({
       isPressed: touchPressedState[direction],
+      disabled: disabledRef.current,
       onPointerDown: (event) => {
         if (disabledRef.current) {
           return;
@@ -339,6 +342,7 @@ export function useCatInputControls({
   const interactButtonBinding = useMemo<InteractButtonBinding>(
     () => ({
       isPressed: isInteractPressed,
+      disabled: disabledRef.current,
       onPointerDown: (event) => {
         if (disabledRef.current) {
           return;

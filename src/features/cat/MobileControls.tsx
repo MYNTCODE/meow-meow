@@ -4,6 +4,7 @@ type Direction = 'left' | 'right' | 'up' | 'down';
 
 interface DirectionButtonBinding {
   isPressed: boolean;
+  disabled: boolean;
   onPointerDown: React.PointerEventHandler<HTMLButtonElement>;
   onPointerUp: React.PointerEventHandler<HTMLButtonElement>;
   onPointerCancel: React.PointerEventHandler<HTMLButtonElement>;
@@ -18,23 +19,58 @@ interface MobileControlsProps {
 }
 
 function DirectionButton({
-  label,
+  direction,
   binding,
 }: {
-  label: string;
+  direction: Direction;
   binding: DirectionButtonBinding;
 }) {
+  const ariaLabel = {
+    up: 'Move up',
+    down: 'Move down',
+    left: 'Move left',
+    right: 'Move right',
+  }[direction];
+  const directionClassName = {
+    up: styles.upButton,
+    down: styles.downButton,
+    left: styles.leftButton,
+    right: styles.rightButton,
+  }[direction];
+
   return (
     <button
       type="button"
-      className={`${styles.button} ${binding.isPressed ? styles.pressed : ''}`}
+      className={`${styles.pixelControlButton} ${styles.directionButton} ${directionClassName}`}
+      aria-label={ariaLabel}
       aria-pressed={binding.isPressed}
+      disabled={binding.disabled}
       onPointerDown={binding.onPointerDown}
       onPointerUp={binding.onPointerUp}
       onPointerCancel={binding.onPointerCancel}
       onLostPointerCapture={binding.onLostPointerCapture}
     >
-      {label}
+      <span className={styles.buttonBase} aria-hidden="true" />
+      <span className={styles.buttonFace} aria-hidden="true">
+        <span className={styles.pixelDecoration} aria-hidden="true" />
+        <span className={styles.arrowIcon} aria-hidden="true">
+          <svg viewBox="0 0 20 20" focusable="false" aria-hidden="true">
+            {direction === 'up' ? (
+              <polygon points="10,2 18,10 13,10 13,18 7,18 7,10 2,10" />
+            ) : null}
+            {direction === 'down' ? (
+              <polygon points="10,18 2,10 7,10 7,2 13,2 13,10 18,10" />
+            ) : null}
+            {direction === 'left' ? (
+              <polygon points="2,10 10,2 10,7 18,7 18,13 10,13 10,18" />
+            ) : null}
+            {direction === 'right' ? (
+              <polygon points="18,10 10,18 10,13 2,13 2,7 10,7 10,2" />
+            ) : null}
+          </svg>
+        </span>
+        <span className={styles.pixelDecorationLower} aria-hidden="true" />
+      </span>
     </button>
   );
 }
@@ -51,29 +87,27 @@ export function MobileControls({
   return (
     <section className={styles.wrap} aria-label="Touch controls">
       <div className={styles.mobileDpad} aria-label="Movement controls">
-        <div className={styles.upSlot}>
-          <DirectionButton label="Up" binding={up} />
-        </div>
-        <div className={styles.leftSlot}>
-          <DirectionButton label="Left" binding={left} />
-        </div>
-        <div className={styles.downSlot}>
-          <DirectionButton label="Down" binding={down} />
-        </div>
-        <div className={styles.rightSlot}>
-          <DirectionButton label="Right" binding={right} />
-        </div>
+        <DirectionButton direction="up" binding={up} />
+        <DirectionButton direction="left" binding={left} />
+        <DirectionButton direction="down" binding={down} />
+        <DirectionButton direction="right" binding={right} />
       </div>
       <button
         type="button"
-        className={`${styles.button} ${styles.interactButton} ${interactButton.isPressed ? styles.pressed : ''}`}
+        className={`${styles.pixelControlButton} ${styles.interactButton}`}
         aria-pressed={interactButton.isPressed}
+        disabled={interactButton.disabled}
         onPointerDown={interactButton.onPointerDown}
         onPointerUp={interactButton.onPointerUp}
         onPointerCancel={interactButton.onPointerCancel}
         onLostPointerCapture={interactButton.onLostPointerCapture}
       >
-        Interact
+        <span className={styles.buttonBase} aria-hidden="true" />
+        <span className={styles.buttonFace}>
+          Interact
+          <span className={styles.pixelDecoration} aria-hidden="true" />
+          <span className={styles.pixelDecorationLower} aria-hidden="true" />
+        </span>
       </button>
     </section>
   );

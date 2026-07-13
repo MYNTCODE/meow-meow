@@ -1,92 +1,234 @@
-.wrap {
+.wrap,
+.mobileControls {
   display: none;
 }
 
 @media (pointer: fine) {
-  .wrap {
+  .wrap,
+  .mobileControls {
     display: none;
   }
 }
 
 @media (pointer: coarse) {
-  .wrap {
+  .wrap,
+  .mobileControls {
+    --control-face: #f7efd8;
+    --control-face-pressed: #e9d8b1;
+    --control-border: #4b3829;
+    --control-base: #caa251;
+    --control-icon: #332217;
+    --control-highlight: #fff4cb;
+    --control-disabled-face: #f0eadf;
+    --control-disabled-border: #b8aa97;
+    --control-disabled-base: #d8ccbb;
+    --control-disabled-icon: #9a8b79;
+    --control-base-depth: 5px;
+    --control-key-size: 58px;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 12px 16px;
+    gap: 14px;
     width: min(100%, 720px);
+    max-width: 100%;
     padding:
-      8px max(0px, env(safe-area-inset-right))
-      0 max(0px, env(safe-area-inset-left));
+      8px max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
+    box-sizing: border-box;
   }
 
   .mobileDpad {
     display: grid;
-    grid-template-columns: repeat(3, 52px);
-    grid-template-rows: repeat(2, 52px);
-    gap: 6px;
+    grid-template-columns: repeat(3, var(--control-key-size));
+    grid-template-rows: repeat(2, var(--control-key-size));
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
   }
 
-  .button {
-    width: 52px;
-    height: 52px;
-    border: 3px solid #6f4e37;
-    background: #fff7ec;
-    color: #4b3829;
+  .pixelControlButton {
+    position: relative;
+    box-sizing: border-box;
+    min-width: var(--control-key-size);
+    min-height: var(--control-key-size);
     padding: 0;
-    font-size: 0.8rem;
+    border: 0;
+    background: transparent;
+    color: var(--control-icon);
+    font: inherit;
     font-weight: 800;
-    line-height: 1.1;
-    text-align: center;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
     touch-action: none;
   }
 
-  .pressed {
-    background: #f2c66d;
-    transform: translateY(1px);
+  .directionButton {
+    width: var(--control-key-size);
+    height: var(--control-key-size);
   }
 
-  .upSlot {
+  .upButton {
     grid-column: 2;
     grid-row: 1;
   }
 
-  .leftSlot {
+  .leftButton {
     grid-column: 1;
     grid-row: 2;
   }
 
-  .downSlot {
+  .downButton {
     grid-column: 2;
     grid-row: 2;
   }
 
-  .rightSlot {
+  .rightButton {
     grid-column: 3;
     grid-row: 2;
   }
 
   .interactButton {
     width: auto;
-    min-width: 96px;
-    height: 52px;
-    padding: 0 14px;
+    min-width: 118px;
+    height: var(--control-key-size);
+  }
+
+  .buttonBase,
+  .buttonFace {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-radius: 2px;
+    clip-path: polygon(0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px));
+    box-sizing: border-box;
+  }
+
+  .buttonBase {
+    bottom: 0;
+    height: var(--control-base-depth);
+    background: var(--control-base);
+  }
+
+  .buttonFace {
+    top: 0;
+    bottom: var(--control-base-depth);
+    border: 3px solid var(--control-border);
+    background: var(--control-face);
+    box-shadow:
+      inset 1px 1px 0 var(--control-highlight),
+      inset -1px -1px 0 rgba(75, 56, 41, 0.18);
+    display: grid;
+    place-items: center;
+    transform: translateY(0);
+  }
+
+  .pixelControlButton:active .buttonFace,
+  .pixelControlButton[aria-pressed='true'] .buttonFace {
+    transform: translateY(4px);
+    background: var(--control-face-pressed);
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 244, 203, 0.72),
+      inset -1px -1px 0 rgba(75, 56, 41, 0.18);
+  }
+
+  .pixelControlButton:active .buttonBase,
+  .pixelControlButton[aria-pressed='true'] .buttonBase {
+    height: 1px;
+  }
+
+  .pixelControlButton:disabled {
+    cursor: not-allowed;
+  }
+
+  .pixelControlButton:disabled .buttonFace {
+    background: var(--control-disabled-face);
+    border-color: var(--control-disabled-border);
+    bottom: 0;
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.56),
+      inset -1px -1px 0 rgba(184, 170, 151, 0.3);
+  }
+
+  .pixelControlButton:disabled .buttonBase {
+    background: var(--control-disabled-base);
+    height: 0;
+  }
+
+  .pixelControlButton:disabled .arrowIcon,
+  .pixelControlButton:disabled .buttonFace {
+    color: var(--control-disabled-icon);
+  }
+
+  .buttonFace {
+    overflow: hidden;
+  }
+
+  .pixelDecoration,
+  .pixelDecorationLower {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--control-base);
+    pointer-events: none;
+  }
+
+  .pixelDecoration {
+    top: 4px;
+    left: 5px;
+    box-shadow:
+      4px 0 0 var(--control-base),
+      0 4px 0 var(--control-base);
+  }
+
+  .pixelDecorationLower {
+    right: 5px;
+    bottom: 4px;
+    box-shadow:
+      -4px 0 0 var(--control-base),
+      0 -4px 0 var(--control-base);
+  }
+
+  .arrowIcon {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    display: block;
+    color: var(--control-icon);
+  }
+
+  .arrowIcon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+    shape-rendering: crispEdges;
+  }
+
+  .buttonFace {
+    font-size: 0.8rem;
+    letter-spacing: 0.01em;
   }
 }
 
 @media (pointer: coarse) and (max-width: 420px) {
-  .wrap {
-    flex-direction: column;
-    gap: 10px;
+  .wrap,
+  .mobileControls {
+    --control-key-size: 56px;
   }
 
   .mobileDpad {
-    grid-template-columns: repeat(3, 50px);
-    grid-template-rows: repeat(2, 50px);
-    gap: 5px;
+    gap: 7px;
+  }
+
+  .interactButton {
+    min-width: 112px;
   }
 }
