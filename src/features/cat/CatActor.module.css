@@ -5,6 +5,56 @@
   pointer-events: none;
 }
 
+.eatRenderShift {
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom center;
+  transform:
+    translate(var(--eat-render-offset-x, 0px), var(--eat-render-offset-y, 0px))
+    scale(var(--eat-render-scale, 1));
+}
+
+@media (pointer: coarse) and (max-width: 720px) {
+  .eatRenderShift {
+    transform:
+      translate(
+        calc(var(--eat-render-offset-x, 0px) * 0.8),
+        calc(var(--eat-render-offset-y, 0px) * 0.72)
+      )
+      scale(calc(var(--eat-render-scale, 1.8) * 0.95));
+  }
+
+  .eatRenderShift[data-phase='postEat'] {
+    transform:
+      translate(
+        calc(var(--post-eat-mobile-render-offset-x, var(--post-eat-render-offset-x, 4px)) * 11),
+        calc(var(--post-eat-mobile-render-offset-y, var(--post-eat-render-offset-y, 9px)) * 11)
+      )
+      scale(calc(var(--post-eat-mobile-render-scale, 1) * 0.95));
+  }
+}
+
+@media (pointer: coarse) and (min-width: 721px) {
+
+   .eatRenderShift {
+    transform:
+      translate(
+        calc(var(--eat-render-offset-x, 0px) * 1.5),
+        calc(var(--eat-render-offset-y, 0px) * 1)
+      )
+      scale(calc(var(--eat-render-scale, 1.8) * 0.95));
+  }
+
+  .eatRenderShift[data-phase='postEat'] {
+    transform:
+      translate(
+        calc(var(--post-eat-tablet-render-offset-x, var(--post-eat-render-offset-x, 0px)) * 0.6),
+        calc(var(--post-eat-tablet-render-offset-y, var(--post-eat-render-offset-y, 0px)) * 0.86)
+      )
+      scale(calc(var(--post-eat-tablet-render-scale, var(--post-eat-render-scale, 1)) * 0.98));
+  }
+}
+
 .debugOutline {
   outline: 2px solid #e23b3b;
   outline-offset: 2px;

@@ -1,16 +1,57 @@
-export type FurnitureId = 'cat-cushion' | 'cat-cushion-pink';
+export type FurnitureId = 'cat-cushion' | 'cat-cushion-pink' | 'food-bowl';
 
-export type FurnitureCategory = 'comfort' | 'cushion';
+export type FurnitureCategory = 'comfort' | 'cushion' | 'food';
 
-export type FurnitureAssetKey = 'catCushion' | 'catCushionPink';
+export type FurnitureAssetKey = 'catCushion' | 'catCushionPink' | 'foodBowlEmpty' | 'foodBowlFull';
 
-export type PanelView = 'room' | 'shop' | 'inventory';
+export type FoodBowlState = 'empty' | 'full';
+
+export type FurnitureRestInteraction = {
+  type: 'rest';
+  range: number;
+  anchorOffsetX: number;
+  anchorOffsetY: number;
+  catOffsetX: number;
+  catOffsetY: number;
+  catFacingDirection?: FacingDirection;
+  catScale?: number;
+  catRenderOffsetX?: number;
+  catRenderOffsetY?: number;
+};
+
+export type FurnitureEatInteraction = {
+  type: 'eat';
+  range: number;
+  bowlAnchorOffsetX: number;
+  bowlAnchorOffsetY: number;
+  catStandOffsetX: number;
+  catStandOffsetY: number;
+  catFacingDirection: FacingDirection;
+  eatSide: 'left' | 'right' | 'top' | 'bottom';
+  mouthOffsetX?: number;
+  mouthOffsetY?: number;
+  eatRenderOffsetX?: number;
+  eatRenderOffsetY?: number;
+  eatCatScale?: number;
+  postEatRenderOffsetX?: number;
+  postEatRenderOffsetY?: number;
+  postEatTabletRenderOffsetX?: number;
+  postEatTabletRenderOffsetY?: number;
+  postEatTabletRenderScale?: number;
+  postEatMobileRenderOffsetX?: number;
+  postEatMobileRenderOffsetY?: number;
+  postEatMobileRenderScale?: number;
+};
+
+export type FurnitureInteraction = FurnitureRestInteraction | FurnitureEatInteraction;
+
+export type OpenPanel = 'shop' | 'inventory' | null;
 
 export type CatVariant = 'gray';
 
-export type CatSpriteKey = 'idle' | 'walk1' | 'walk2' | 'sit';
+export type CatSpriteKey = 'idle' | 'walk1' | 'walk2' | 'sit' | 'eat1' | 'eat2';
 
-export type CatBehaviorState = 'idle' | 'walking' | 'resting';
+export type CatBehaviorState = 'idle' | 'walking' | 'resting' | 'eating';
 
 export type FacingDirection = 'left' | 'right';
 
@@ -66,6 +107,7 @@ export interface FurnitureItem {
   price: number;
   category: FurnitureCategory;
   assetKey: FurnitureAssetKey;
+  draggable?: boolean;
   sourceWidth: number;
   sourceHeight: number;
   placement: {
@@ -76,16 +118,12 @@ export interface FurnitureItem {
     zIndex: number;
   };
   rendering?: {
+    scale?: number;
     depthAnchorOffsetY: number;
   };
-  interaction?: {
-    type: 'rest';
-    range: number;
-    catOffsetX: number;
-    catOffsetY: number;
-    catFacingDirection?: FacingDirection;
-    catRenderOffsetX?: number;
-    catRenderOffsetY?: number;
+  interaction?: FurnitureInteraction;
+  statefulAssets?: {
+    foodState?: Record<FoodBowlState, FurnitureAssetKey>;
   };
   collision?: CollisionBox & {
     solid: boolean;
@@ -102,6 +140,9 @@ export interface PlacedFurniture {
   furnitureId: FurnitureId;
   positionId: string;
   placement: FurniturePlacement;
+  interactionState?: {
+    foodState?: FoodBowlState;
+  };
 }
 
 export interface GameState {
@@ -110,5 +151,5 @@ export interface GameState {
   cat: Cat;
   inventory: InventoryItem[];
   placedFurniture: PlacedFurniture[];
-  activePanel: PanelView;
+  openPanel: OpenPanel;
 }

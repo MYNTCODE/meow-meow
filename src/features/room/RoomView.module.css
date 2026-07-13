@@ -6,6 +6,17 @@
   min-width: 0;
 }
 
+.interactionFeedback {
+  width: min(100%, 720px);
+  border: 3px solid #6f4e37;
+  background: #fff1df;
+  color: #4b3829;
+  padding: 6px 10px;
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-align: center;
+}
+
 .roomFrame {
   position: relative;
   width: min(100%, 720px);
@@ -17,9 +28,6 @@
 }
 
 .debugToggle {
-  position: absolute;
-  top: 8px;
-  left: 8px;
   border: 3px solid #4b3829;
   background: #fff7ec;
   color: #4b3829;
@@ -27,15 +35,25 @@
   font-size: 0.75rem;
   font-weight: 800;
   cursor: pointer;
+}
+
+.debugControls {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 6px;
   z-index: 21;
 }
 
-.debugToggleMobileVisible {
-  display: block;
-}
-
-.debugToggleMobileHidden {
-  display: none;
+.debugToggleSecondary {
+  border: 3px solid #4b3829;
+  background: #fff7ec;
+  color: #4b3829;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .roomImage {
@@ -104,20 +122,34 @@
 }
 
 @media (pointer: coarse) {
-  .debugToggle {
-    display: none;
+  .roomStack {
+    gap: 5px;
   }
 
-  .debugToggleMobileVisible {
-    display: block;
-    top: 6px;
-    left: 6px;
+  .roomFrame {
+    width: min(92vw, 720px);
+  }
+
+  .debugToggle {
     padding: 3px 6px;
     font-size: 0.6875rem;
     border-width: 2px;
   }
 
-  .debugToggleMobileHidden {
-    display: none;
+  .debugControls {
+    top: 6px;
+    left: 6px;
+    gap: 4px;
+  }
+
+  .debugToggleSecondary {
+    padding: 3px 6px;
+    font-size: 0.6875rem;
+    border-width: 2px;
+  }
+
+  .interactionFeedback {
+    padding: 5px 8px;
+    font-size: 0.8125rem;
   }
 }
