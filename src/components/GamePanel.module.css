@@ -45,6 +45,10 @@
   overflow: hidden;
 }
 
+.panelWide {
+  width: min(820px, calc(100vw - 48px));
+}
+
 .panelVisible {
   transform: translateY(0);
   opacity: 1;
@@ -69,11 +73,16 @@
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 @media (max-width: 900px) {
   .panel {
     width: min(80%, 600px);
+  }
+
+  .panelWide {
+    width: min(820px, calc(100vw - 40px));
   }
 }
 

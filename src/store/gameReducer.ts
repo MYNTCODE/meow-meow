@@ -1,6 +1,7 @@
 import { getFurnitureItem } from '../data/furniture';
+import { ROOM_SLOT_POSITIONS } from '../data/roomSlots';
 import { defaultCat } from '../data/cats';
-import type { FurnitureId, GameState, OpenPanel } from '../types/game';
+import type { EquippedItems, FurnitureId, GameState, OpenPanel } from '../types/game';
 import { DEFAULT_ROOM_NAME, normalizeRoomName } from '../utils/roomName';
 import type { PlacedFurniture } from '../types/game';
 
@@ -11,7 +12,7 @@ function buildPlacedFurnitureInstanceId(furnitureId: FurnitureId, positionId: st
 export type GameAction =
   | { type: 'earnCoins'; amount: number }
   | { type: 'buyFurniture'; furnitureId: FurnitureId }
-  | { type: 'placeFurniture'; furnitureId: FurnitureId; positionId: string }
+  | { type: 'equipFurniture'; furnitureId: FurnitureId }
   | { type: 'setPlacedFurnitureLayout'; placedFurniture: PlacedFurniture[] }
   | { type: 'setOpenPanel'; panel: OpenPanel }
   | { type: 'setRoomName'; roomName: string }
@@ -22,6 +23,7 @@ export const DEFAULT_GAME_STATE: GameState = {
   roomName: DEFAULT_ROOM_NAME,
   cat: defaultCat,
   inventory: [],
+  equippedItems: {},
   placedFurniture: [],
   openPanel: null,
 };
@@ -48,18 +50,19 @@ function getDefaultPlacedFurniture(
   positionId: string,
 ): PlacedFurniture | undefined {
   const furniture = getFurnitureItem(furnitureId);
+  const slotPosition = ROOM_SLOT_POSITIONS[furniture?.slot ?? positionId as keyof typeof ROOM_SLOT_POSITIONS];
 
-  if (!furniture) {
+  if (!furniture || !slotPosition || furniture.slot !== positionId) {
     return undefined;
   }
 
   return {
     instanceId: buildPlacedFurnitureInstanceId(furnitureId, positionId),
     furnitureId,
-    positionId,
+    positionId: furniture.slot,
     placement: {
-      x: furniture.placement.x,
-      y: furniture.placement.y,
+      x: slotPosition.x,
+      y: slotPosition.y,
       width: furniture.placement.width,
       zIndex: furniture.placement.zIndex,
     },
@@ -70,6 +73,50 @@ function getDefaultPlacedFurniture(
           }
         : undefined,
   };
+}
+
+function buildEquippedItemsFromPlacedFurniture(
+  placedFurniture: GameState['placedFurniture'],
+): EquippedItems {
+  return placedFurniture.reduce<EquippedItems>((equippedItems, item) => {
+    const furniture = getFurnitureItem(item.furnitureId);
+
+    if (!furniture) {
+      return equippedItems;
+    }
+
+    equippedItems[furniture.slot] = item.furnitureId;
+    return equippedItems;
+  }, {});
+}
+
+function buildPlacedFurnitureFromEquippedItems(
+  equippedItems: EquippedItems,
+  previousPlacedFurniture: GameState['placedFurniture'],
+): GameState['placedFurniture'] {
+  return Object.entries(equippedItems).flatMap(([slot, furnitureId]) => {
+    if (!furnitureId) {
+      return [];
+    }
+
+    const normalizedItem = getDefaultPlacedFurniture(furnitureId, slot);
+
+    if (!normalizedItem) {
+      return [];
+    }
+
+    const previousItem = previousPlacedFurniture.find((item) => item.positionId === slot);
+
+    return [
+      {
+        ...normalizedItem,
+        interactionState:
+          previousItem?.furnitureId === furnitureId
+            ? previousItem.interactionState ?? normalizedItem.interactionState
+            : normalizedItem.interactionState,
+      },
+    ];
+  });
 }
 
 function normalizePlacedFurniture(
@@ -99,14 +146,31 @@ function normalizePlacedFurniture(
   });
 }
 
-export function createInitialGameState(savedState: Partial<GameState> = {}): GameState {
+export function createInitialGameState(
+  savedState: Partial<GameState> & { activeItemId?: FurnitureId | null } = {},
+): GameState {
+  const legacyActiveFurniture = savedState.activeItemId ? getFurnitureItem(savedState.activeItemId) : undefined;
+  const migratedEquippedItems =
+    savedState.equippedItems && Object.keys(savedState.equippedItems).length > 0
+      ? savedState.equippedItems
+      : savedState.placedFurniture && savedState.placedFurniture.length > 0
+        ? buildEquippedItemsFromPlacedFurniture(savedState.placedFurniture)
+        : legacyActiveFurniture
+          ? { [legacyActiveFurniture.slot]: legacyActiveFurniture.id }
+          : {};
+  const normalizedPlacedFurniture = normalizePlacedFurniture(
+    savedState.placedFurniture ?? DEFAULT_GAME_STATE.placedFurniture,
+  );
+
   return {
     ...DEFAULT_GAME_STATE,
     coins: savedState.coins ?? DEFAULT_GAME_STATE.coins,
     roomName: normalizeRoomName(savedState.roomName),
     inventory: savedState.inventory ?? DEFAULT_GAME_STATE.inventory,
-    placedFurniture: normalizePlacedFurniture(
-      savedState.placedFurniture ?? DEFAULT_GAME_STATE.placedFurniture,
+    equippedItems: migratedEquippedItems,
+    placedFurniture: buildPlacedFurnitureFromEquippedItems(
+      migratedEquippedItems,
+      normalizedPlacedFurniture,
     ),
     openPanel: null,
   };
@@ -122,8 +186,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'buyFurniture': {
       const furniture = getFurnitureItem(action.furnitureId);
+      const alreadyOwned = state.inventory.some((item) => item.furnitureId === action.furnitureId);
 
-      if (!furniture || state.coins < furniture.price) {
+      if (!furniture || alreadyOwned || state.coins < furniture.price) {
         return state;
       }
 
@@ -134,55 +199,42 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case 'placeFurniture': {
-      const inventoryItem = state.inventory.find(
-        (item) => item.furnitureId === action.furnitureId,
-      );
-      const existingPlacedItem = state.placedFurniture.find(
-        (item) => item.positionId === action.positionId,
-      );
+    case 'equipFurniture': {
+      const furniture = getFurnitureItem(action.furnitureId);
+      const inventoryItem = state.inventory.find((item) => item.furnitureId === action.furnitureId);
 
-      if (!inventoryItem || inventoryItem.quantity < 1) {
+      if (!furniture || !inventoryItem) {
         return state;
       }
 
-      const inventoryAfterPlacement = state.inventory
-        .map((item) =>
-          item.furnitureId === action.furnitureId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item,
-        )
-        .filter((item) => item.quantity > 0);
-      const inventory = existingPlacedItem
-        ? addInventoryItem(inventoryAfterPlacement, existingPlacedItem.furnitureId)
-        : inventoryAfterPlacement;
-
-      const defaultPlacedFurniture = getDefaultPlacedFurniture(
-        action.furnitureId,
-        action.positionId,
-      );
-
-      if (!defaultPlacedFurniture) {
+      if (state.equippedItems[furniture.slot] === action.furnitureId) {
         return state;
       }
+
+      const equippedItems = {
+        ...state.equippedItems,
+        [furniture.slot]: action.furnitureId,
+      };
 
       return {
         ...state,
-        inventory,
-        placedFurniture: [
-          ...state.placedFurniture.filter(
-            (item) => item.positionId !== action.positionId,
-          ),
-          defaultPlacedFurniture,
-        ],
+        equippedItems,
+        placedFurniture: buildPlacedFurnitureFromEquippedItems(
+          equippedItems,
+          state.placedFurniture,
+        ),
       };
     }
 
-    case 'setPlacedFurnitureLayout':
+    case 'setPlacedFurnitureLayout': {
+      const normalizedFurniture = normalizePlacedFurniture(action.placedFurniture);
+
       return {
         ...state,
-        placedFurniture: normalizePlacedFurniture(action.placedFurniture),
+        equippedItems: buildEquippedItemsFromPlacedFurniture(normalizedFurniture),
+        placedFurniture: normalizedFurniture,
       };
+    }
 
     case 'setOpenPanel':
       return {

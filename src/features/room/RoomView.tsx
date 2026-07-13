@@ -1,31 +1,43 @@
 import { useRef, useState, type Dispatch } from 'react';
-import { gameAssets } from '../../data/assets';
+import { gameAssets, getFurnitureAssetForPlacement } from '../../data/assets';
+import { getFurnitureItem } from '../../data/furniture';
+import { getRoomPlacementAnchors } from '../../data/roomSlots';
 import { useCatBehavior } from '../../hooks/useCatBehavior';
 import { useRoomEditMode } from '../../hooks/useRoomEditMode';
 import { useRoomMetrics } from '../../hooks/useRoomMetrics';
 import { clearGameState } from '../../store/gameStorage';
+import type { GameAction } from '../../store/gameReducer';
+import type { FurnitureId, GameState } from '../../types/game';
+import { getCatDepthAnchorY, getFurnitureDepthAnchorY } from '../../utils/collision';
+import { getFurnitureRenderScale } from '../../utils/collision';
 import { CatActor } from '../cat/CatActor';
 import { CatControlPanel } from '../cat/CatControlPanel';
 import { MobileControls } from '../cat/MobileControls';
 import { FurnitureSprite } from './FurnitureSprite';
-import { RoomEditControls } from './RoomEditControls';
 import { RoomDebugOverlay } from './RoomDebugOverlay';
-import type { GameState } from '../../types/game';
-import type { GameAction } from '../../store/gameReducer';
-import { getFurnitureItem } from '../../data/furniture';
-import { getCatDepthAnchorY, getFurnitureDepthAnchorY } from '../../utils/collision';
+import { RoomEditControls } from './RoomEditControls';
 import styles from './RoomView.module.css';
 
 interface RoomViewProps {
   state: GameState;
   dispatch: Dispatch<GameAction>;
+  isRoomEditing: boolean;
+  onEditingChange: (nextValue: boolean) => void;
+  onPlacementSelectionHandled: () => void;
+  selectedPlacementFurnitureId: FurnitureId | null;
 }
 
-export function RoomView({ state, dispatch }: RoomViewProps) {
+export function RoomView({
+  state,
+  dispatch,
+  isRoomEditing,
+  onEditingChange,
+  onPlacementSelectionHandled,
+  selectedPlacementFurnitureId,
+}: RoomViewProps) {
   const [assetFailed, setAssetFailed] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const [showAnchorLabels, setShowAnchorLabels] = useState(false);
-  const [isRoomEditing, setIsRoomEditing] = useState(false);
   const roomRef = useRef<HTMLElement | null>(null);
   const canShowDebug = import.meta.env.DEV;
   const roomMetrics = useRoomMetrics(roomRef);
@@ -44,11 +56,22 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
     catPosition: catBehavior,
     dispatch,
     isEditing: isRoomEditing,
+    onPlacementSelectionHandled,
     placedFurniture: state.placedFurniture,
     roomRef,
-    setIsEditing: setIsRoomEditing,
+    selectedPlacementFurnitureId,
+    setIsEditing: onEditingChange,
   });
   const placedFurniture = roomEdit.renderedPlacedFurniture;
+  const draggedPlacedItem =
+    roomEdit.draggingItemId
+      ? placedFurniture.find((item) => item.instanceId === roomEdit.draggingItemId) ?? null
+      : null;
+  const draggedFurniture = draggedPlacedItem ? getFurnitureItem(draggedPlacedItem.furnitureId) : null;
+  const draggedAssetPath =
+    draggedFurniture && draggedPlacedItem
+      ? getFurnitureAssetForPlacement(draggedFurniture, draggedPlacedItem)
+      : null;
   const roomObjects = [
     ...placedFurniture.map((placedItem) => {
       const furniture = getFurnitureItem(placedItem.furnitureId);
@@ -108,6 +131,62 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
         onSave={roomEdit.saveLayout}
       />
       <section ref={roomRef} className={styles.roomFrame} aria-label="Mew Mew room">
+        {draggedFurniture && draggedPlacedItem && draggedAssetPath && roomEdit.ghostPreviews.length > 0 ? (
+          <div className={styles.ghostPreviewLayer} aria-hidden="true">
+            {roomEdit.ghostPreviews.map((preview) => (
+              <div
+                key={preview.anchorId}
+                className={`${styles.ghostPreview} ${
+                  preview.state === 'active'
+                    ? styles.ghostPreviewActive
+                    : preview.state === 'nearest'
+                      ? styles.ghostPreviewNearest
+                      : styles.ghostPreviewDefault
+                }`}
+                style={{
+                  left: `${preview.placement.x}%`,
+                  top: `${preview.placement.y}%`,
+                  width: `${draggedPlacedItem.placement.width * getFurnitureRenderScale(draggedFurniture)}%`,
+                  aspectRatio: `${draggedFurniture.sourceWidth} / ${draggedFurniture.sourceHeight}`,
+                }}
+              >
+                <img src={draggedAssetPath} alt="" draggable="false" />
+              </div>
+            ))}
+          </div>
+        ) : null}
+        {isRoomEditing && roomEdit.activeFurnitureSlot && !roomEdit.draggingItemId ? (
+          <div className={styles.placementHintLayer} aria-hidden="true">
+            {getRoomPlacementAnchors(roomEdit.activeFurnitureSlot).map((anchor) => (
+              <span
+                key={anchor.id}
+                className={`${styles.placementHint} ${
+                  anchor.hint === 'wall' ? styles.wallHint : styles.floorHint
+                } ${
+                  roomEdit.draggingItemId && roomObjects.some(
+                    (object) =>
+                      object.type === 'furniture' &&
+                      object.dragBindings.nearestAnchorId === anchor.id,
+                  )
+                    ? styles.hintNearest
+                    : ''
+                } ${
+                  roomEdit.draggingItemId && roomObjects.some(
+                    (object) =>
+                      object.type === 'furniture' &&
+                      object.dragBindings.activeAnchorId === anchor.id,
+                  )
+                    ? styles.hintActive
+                    : ''
+                }`}
+                style={{
+                  left: `${anchor.x}%`,
+                  top: `${anchor.y}%`,
+                }}
+              />
+            ))}
+          </div>
+        ) : null}
         {canShowDebug ? (
           <div className={styles.debugControls}>
             <button
@@ -156,6 +235,10 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
                   placedFurniture={object.placedItem}
                   renderOrder={index + 1}
                   dragBindings={object.dragBindings}
+                  isGhost={Boolean(
+                    selectedPlacementFurnitureId &&
+                      object.placedItem.furnitureId === selectedPlacementFurnitureId,
+                  )}
                   isInvalid={roomEdit.invalidFurnitureIds.has(object.placedItem.instanceId)}
                   isPlayingTarget={object.isPlayingTarget}
                   playFrameIndex={playFrameIndex}
@@ -188,16 +271,23 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
           />
         ) : null}
       </section>
-      <MobileControls
-        bindDirectionButton={touchControls.bindDirectionButton}
-        interactButton={touchControls.interactButton}
-      />
-      {interactionFeedback ? (
+      {!isRoomEditing ? (
+        <MobileControls
+          bindDirectionButton={touchControls.bindDirectionButton}
+          interactButton={touchControls.interactButton}
+        />
+      ) : null}
+      {isRoomEditing && roomEdit.isNoSpaceAvailable ? (
+        <div className={styles.interactionFeedback} role="status" aria-live="polite">
+          No space available
+        </div>
+      ) : null}
+      {!isRoomEditing && interactionFeedback ? (
         <div className={styles.interactionFeedback} role="status" aria-live="polite">
           {interactionFeedback}
         </div>
       ) : null}
-      <CatControlPanel behavior={catBehavior} />
+      {!isRoomEditing ? <CatControlPanel behavior={catBehavior} /> : null}
     </div>
   );
 }

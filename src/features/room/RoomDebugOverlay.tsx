@@ -1,4 +1,5 @@
 import type { CatMovementPoint } from '../../data/catMovementPoints';
+import { ROOM_PLACEMENT_ANCHORS } from '../../data/roomSlots';
 import { roomWalkableArea } from '../../data/roomMovementConfig';
 import type { FurnitureDragDebugState } from '../../hooks/useFurnitureDrag';
 import type { RoomMetrics } from '../../hooks/useRoomMetrics';
@@ -171,6 +172,19 @@ export function RoomDebugOverlay({
             top: `${point.y}%`,
           }}
           title={point.id}
+        />
+      ))}
+      {ROOM_PLACEMENT_ANCHORS.map((anchor) => (
+        <span
+          className={
+            anchor.hint === 'wall' ? styles.placementShadowWall : styles.placementShadowFloor
+          }
+          key={anchor.id}
+          style={{
+            left: `${anchor.x}%`,
+            top: `${anchor.y}%`,
+          }}
+          title={`${anchor.slot}:${anchor.id}`}
         />
       ))}
       <span className={styles.catCollision} style={getRectStyle(catCollisionRect)} />
