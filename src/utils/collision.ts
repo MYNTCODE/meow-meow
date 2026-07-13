@@ -9,6 +9,7 @@ import type {
   FurniturePlacement,
   FoodBowlState,
   FurnitureEatInteraction,
+  FurniturePlayInteraction,
   FurnitureRestInteraction,
   PlacedFurniture,
   RoomWalkableArea,
@@ -54,6 +55,15 @@ export interface EatInteractionPosition {
   facingDirection: FacingDirection;
   eatCatScale: number;
   interaction: FurnitureEatInteraction;
+}
+
+export interface PlayInteractionPosition {
+  toyAnchorPoint: CatMovementPoint;
+  catPosition: NormalizedPosition;
+  catRenderPosition: NormalizedPosition;
+  facingDirection: FacingDirection;
+  playCatScale: number;
+  interaction: FurniturePlayInteraction;
 }
 
 function rectFromCollisionBox(
@@ -345,11 +355,24 @@ export function getFurnitureInteractionPoint(placedFurniture: PlacedFurniture) {
     } satisfies CatMovementPoint;
   }
 
+  if (furniture.interaction.type === 'eat') {
+    return {
+      id: `${placedFurniture.positionId}-interaction`,
+      x: placement.x + furniture.interaction.bowlAnchorOffsetX * scale,
+      y: placement.y + furniture.interaction.bowlAnchorOffsetY * scale,
+      facingDirection: furniture.interaction.catFacingDirection,
+      furnitureSlotId: placedFurniture.positionId,
+    } satisfies CatMovementPoint;
+  }
+
   return {
     id: `${placedFurniture.positionId}-interaction`,
-    x: placement.x + furniture.interaction.bowlAnchorOffsetX * scale,
-    y: placement.y + furniture.interaction.bowlAnchorOffsetY * scale,
-    facingDirection: furniture.interaction.catFacingDirection,
+    x: placement.x + furniture.interaction.toyAnchorOffsetX * scale,
+    y: placement.y + furniture.interaction.toyAnchorOffsetY * scale,
+    facingDirection:
+      furniture.interaction.catFacingDirection ??
+      getCatMovementPoint(placedFurniture.positionId)?.facingDirection ??
+      'right',
     furnitureSlotId: placedFurniture.positionId,
   } satisfies CatMovementPoint;
 }
@@ -438,6 +461,61 @@ export function getEatRenderPosition(placedFurniture: PlacedFurniture) {
   return {
     ...eatPosition,
     renderPosition: eatPosition.catRenderPosition,
+  };
+}
+
+export function getPlayInteractionPosition(placedFurniture: PlacedFurniture) {
+  const furniture = getFurnitureItem(placedFurniture.furnitureId);
+
+  if (furniture?.interaction?.type !== 'play') {
+    return undefined;
+  }
+
+  const placement = getResolvedFurniturePlacement(furniture, placedFurniture);
+  const scale = getFurnitureRenderScale(furniture);
+  const toyAnchorPoint = {
+    id: `${placedFurniture.positionId}-interaction`,
+    x: placement.x + furniture.interaction.toyAnchorOffsetX * scale,
+    y: placement.y + furniture.interaction.toyAnchorOffsetY * scale,
+    facingDirection:
+      furniture.interaction.catFacingDirection ??
+      getCatMovementPoint(placedFurniture.positionId)?.facingDirection ??
+      'right',
+    furnitureSlotId: placedFurniture.positionId,
+  } satisfies CatMovementPoint;
+
+  return {
+    toyAnchorPoint,
+    catPosition: {
+      x: toyAnchorPoint.x + furniture.interaction.catOffsetX * scale,
+      y: toyAnchorPoint.y + furniture.interaction.catOffsetY * scale,
+    },
+    catRenderPosition: {
+      x:
+        toyAnchorPoint.x +
+        furniture.interaction.catOffsetX * scale +
+        (furniture.interaction.catRenderOffsetX ?? 0) * scale,
+      y:
+        toyAnchorPoint.y +
+        furniture.interaction.catOffsetY * scale +
+        (furniture.interaction.catRenderOffsetY ?? 0) * scale,
+    },
+    facingDirection: toyAnchorPoint.facingDirection,
+    playCatScale: furniture.interaction.catScale ?? 1,
+    interaction: furniture.interaction,
+  } satisfies PlayInteractionPosition;
+}
+
+export function getPlayRenderPosition(placedFurniture: PlacedFurniture) {
+  const playPosition = getPlayInteractionPosition(placedFurniture);
+
+  if (!playPosition) {
+    return undefined;
+  }
+
+  return {
+    ...playPosition,
+    renderPosition: playPosition.catRenderPosition,
   };
 }
 

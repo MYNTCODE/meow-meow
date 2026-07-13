@@ -2,25 +2,20 @@
   padding: 16px;
 }
 
-.panelHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: baseline;
-  margin-bottom: 14px;
-}
-
-.panelHeader h2,
 .inventoryItem h3 {
   margin: 0;
   color: #4b3829;
 }
 
-.panelHeader p,
+.panelIntro,
 .inventoryItem p,
 .emptyState {
   margin: 0;
   color: #765948;
+}
+
+.panelIntro {
+  margin-bottom: 14px;
 }
 
 .itemList {

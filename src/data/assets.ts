@@ -10,6 +10,8 @@ export const gameAssets = {
       sit: '/assets/cats/gray/cat-sit.png',
       eat1: '/assets/cats/gray/cat-eat-1.png',
       eat2: '/assets/cats/gray/cat-eat-2.png',
+      play1: '/assets/cats/gray/cat-play-1.png',
+      play2: '/assets/cats/gray/cat-play-2.png',
     },
   },
   rooms: {
@@ -20,6 +22,7 @@ export const gameAssets = {
     catCushionPink: '/assets/items/cat-cushion-pink.png',
     foodBowlEmpty: '/assets/items/food-bowl-empty.png',
     foodBowlFull: '/assets/items/food-bowl-full.png',
+    catBall: '/assets/items/cat-ball.png',
   },
 } as const;
 

@@ -36,7 +36,6 @@
       8px max(12px, env(safe-area-inset-right))
       max(12px, env(safe-area-inset-bottom))
       max(12px, env(safe-area-inset-left));
-    touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     box-sizing: border-box;

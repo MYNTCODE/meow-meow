@@ -1,8 +1,13 @@
-export type FurnitureId = 'cat-cushion' | 'cat-cushion-pink' | 'food-bowl';
+export type FurnitureId = 'cat-cushion' | 'cat-cushion-pink' | 'food-bowl' | 'cat-ball';
 
-export type FurnitureCategory = 'comfort' | 'cushion' | 'food';
+export type FurnitureCategory = 'comfort' | 'cushion' | 'food' | 'toy';
 
-export type FurnitureAssetKey = 'catCushion' | 'catCushionPink' | 'foodBowlEmpty' | 'foodBowlFull';
+export type FurnitureAssetKey =
+  | 'catCushion'
+  | 'catCushionPink'
+  | 'foodBowlEmpty'
+  | 'foodBowlFull'
+  | 'catBall';
 
 export type FoodBowlState = 'empty' | 'full';
 
@@ -43,15 +48,39 @@ export type FurnitureEatInteraction = {
   postEatMobileRenderScale?: number;
 };
 
-export type FurnitureInteraction = FurnitureRestInteraction | FurnitureEatInteraction;
+export type FurniturePlayInteraction = {
+  type: 'play';
+  range: number;
+  toyAnchorOffsetX: number;
+  toyAnchorOffsetY: number;
+  catOffsetX: number;
+  catOffsetY: number;
+  catFacingDirection?: FacingDirection;
+  catScale?: number;
+  catRenderOffsetX?: number;
+  catRenderOffsetY?: number;
+};
+
+export type FurnitureInteraction =
+  | FurnitureRestInteraction
+  | FurnitureEatInteraction
+  | FurniturePlayInteraction;
 
 export type OpenPanel = 'shop' | 'inventory' | null;
 
 export type CatVariant = 'gray';
 
-export type CatSpriteKey = 'idle' | 'walk1' | 'walk2' | 'sit' | 'eat1' | 'eat2';
+export type CatSpriteKey =
+  | 'idle'
+  | 'walk1'
+  | 'walk2'
+  | 'sit'
+  | 'eat1'
+  | 'eat2'
+  | 'play1'
+  | 'play2';
 
-export type CatBehaviorState = 'idle' | 'walking' | 'resting' | 'eating';
+export type CatBehaviorState = 'idle' | 'walking' | 'resting' | 'eating' | 'playing';
 
 export type FacingDirection = 'left' | 'right';
 

@@ -4,7 +4,6 @@ import {
   catMovementPoints,
   getCatMovementPoint,
 } from '../data/catMovementPoints';
-import { getFurnitureItem } from '../data/furniture';
 import { roomWalkableArea } from '../data/roomMovementConfig';
 import type {
   CatBehaviorCommands,
@@ -17,14 +16,19 @@ import {
   canMoveToPosition,
   clampPositionToRoomBounds,
   findNearestValidPosition,
-  type NearbyInteraction,
-  findNearbyInteractionOfType,
+  findNearbyInteraction,
   getEatInteractionPosition,
+  getPlayInteractionPosition,
   getRestInteractionPosition,
   getPlacedFurnitureFoodState,
 } from '../utils/collision';
 import { useContinuousCatMovement } from './useContinuousCatMovement';
 import { useCatInputControls } from './useCatInputControls';
+import { PLAY_FRAME_DURATION_MS, type PlayFrameIndex } from '../features/cat/playAnimation';
+
+const EAT_DURATION_MS = 3000;
+const PLAY_DURATION_MS = 3000;
+const FEEDBACK_DURATION_MS = 1500;
 
 function getInitialSnapshot(): CatBehaviorSnapshot {
   const defaultPoint = getCatMovementPoint(DEFAULT_CAT_MOVEMENT_POINT_ID) ?? catMovementPoints[0];
@@ -57,31 +61,23 @@ export function useCatBehavior(
   const [snapshot, setSnapshot] = useState<CatBehaviorSnapshot>(getInitialSnapshot);
   const [movementBlocked, setMovementBlocked] = useState(false);
   const [interactionFeedback, setInteractionFeedback] = useState<string | undefined>();
-  const nearestRestInteraction = useMemo(
-    () => findNearbyInteractionOfType({
-      interactionType: 'rest',
-      position: snapshot,
-      placedFurniture,
-    }),
-    [placedFurniture, snapshot],
-  );
-  const nearestEatInteraction = useMemo(
-    () => findNearbyInteractionOfType({
-      interactionType: 'eat',
-      position: snapshot,
-      placedFurniture,
-    }),
+  const [playFrameIndex, setPlayFrameIndex] = useState<PlayFrameIndex>(0);
+  const nearestInteraction = useMemo(
+    () => findNearbyInteraction({ position: snapshot, placedFurniture }),
     [placedFurniture, snapshot],
   );
   const canInteract = Boolean(
     snapshot.state === 'eating' ||
-      (snapshot.state === 'idle' && (nearestRestInteraction || nearestEatInteraction)),
+      snapshot.state === 'playing' ||
+      (snapshot.state === 'idle' && nearestInteraction),
   );
-  const canSit = Boolean(snapshot.state === 'idle' && nearestRestInteraction);
+  const canSit = Boolean(
+    snapshot.state === 'idle' && nearestInteraction?.furniture.interaction?.type === 'rest',
+  );
   const canStand = snapshot.state === 'resting';
-  const eatingTimerRef = useRef<number | undefined>(undefined);
+  const interactionTimerRef = useRef<number | undefined>(undefined);
   const feedbackTimerRef = useRef<number | undefined>(undefined);
-  const currentEatingTargetRef = useRef<NearbyInteraction | undefined>(undefined);
+  const currentTimedInteractionRef = useRef<typeof nearestInteraction | undefined>(undefined);
   const placedFurnitureRef = useRef(placedFurniture);
   const clearMovementInputRef = useRef<(() => void) | null>(null);
 
@@ -89,10 +85,25 @@ export function useCatBehavior(
     placedFurnitureRef.current = placedFurniture;
   }, [placedFurniture]);
 
-  function clearEatingTimer() {
-    if (eatingTimerRef.current !== undefined) {
-      window.clearTimeout(eatingTimerRef.current);
-      eatingTimerRef.current = undefined;
+  useEffect(() => {
+    if (snapshot.state !== 'playing') {
+      setPlayFrameIndex(0);
+      return undefined;
+    }
+
+    setPlayFrameIndex(0);
+
+    const intervalId = window.setInterval(() => {
+      setPlayFrameIndex((currentFrame) => (currentFrame === 0 ? 1 : 0));
+    }, PLAY_FRAME_DURATION_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [snapshot.state]);
+
+  function clearInteractionTimer() {
+    if (interactionTimerRef.current !== undefined) {
+      window.clearTimeout(interactionTimerRef.current);
+      interactionTimerRef.current = undefined;
     }
   }
 
@@ -107,13 +118,19 @@ export function useCatBehavior(
     clearMovementInputRef.current?.();
   }
 
-  const endEating = useCallback(
-    (shouldConsumeFood: boolean) => {
-      const currentTarget = currentEatingTargetRef.current;
+  const finishTimedInteraction = useCallback(
+    ({
+      consumeFood,
+      preserveLastInteraction,
+    }: {
+      consumeFood: boolean;
+      preserveLastInteraction: boolean;
+    }) => {
+      const currentTarget = currentTimedInteractionRef.current;
 
-      clearEatingTimer();
+      clearInteractionTimer();
 
-      if (shouldConsumeFood && currentTarget?.placedItem.instanceId) {
+      if (consumeFood && currentTarget?.placedItem.instanceId) {
         dispatch({
           type: 'setPlacedFurnitureLayout',
           placedFurniture: placedFurnitureRef.current.map((item) =>
@@ -129,7 +146,7 @@ export function useCatBehavior(
         });
       }
 
-      currentEatingTargetRef.current = undefined;
+      currentTimedInteractionRef.current = undefined;
       clearFeedbackTimer();
       setInteractionFeedback(undefined);
 
@@ -139,11 +156,13 @@ export function useCatBehavior(
         currentInteractionItemId: undefined,
         currentInteractionInstanceId: undefined,
         currentInteractionType: undefined,
-        lastInteractionItemId: shouldConsumeFood ? currentTarget?.placedItem.furnitureId : undefined,
-        lastInteractionInstanceId: shouldConsumeFood
+        lastInteractionItemId: preserveLastInteraction ? currentTarget?.placedItem.furnitureId : undefined,
+        lastInteractionInstanceId: preserveLastInteraction
           ? currentTarget?.placedItem.instanceId
           : undefined,
-        lastInteractionType: shouldConsumeFood ? 'eat' : undefined,
+        lastInteractionType: preserveLastInteraction
+          ? currentTarget?.furniture.interaction?.type
+          : undefined,
       }));
       clearMovementInput();
     },
@@ -151,8 +170,12 @@ export function useCatBehavior(
   );
 
   const cancelEating = useCallback(() => {
-    endEating(false);
-  }, [endEating]);
+    finishTimedInteraction({ consumeFood: false, preserveLastInteraction: false });
+  }, [finishTimedInteraction]);
+
+  const cancelPlaying = useCallback(() => {
+    finishTimedInteraction({ consumeFood: false, preserveLastInteraction: false });
+  }, [finishTimedInteraction]);
 
   const showFoodBowlRefilledFeedback = useCallback(() => {
     clearFeedbackTimer();
@@ -160,11 +183,11 @@ export function useCatBehavior(
     feedbackTimerRef.current = window.setTimeout(() => {
       setInteractionFeedback(undefined);
       feedbackTimerRef.current = undefined;
-    }, 1500);
+    }, FEEDBACK_DURATION_MS);
   }, []);
 
   const sit = useCallback(() => {
-    if (!nearestRestInteraction) {
+    if (nearestInteraction?.furniture.interaction?.type !== 'rest') {
       return;
     }
     clearFeedbackTimer();
@@ -175,7 +198,7 @@ export function useCatBehavior(
         return currentSnapshot;
       }
 
-      const restTarget = getRestInteractionPosition(nearestRestInteraction.placedItem);
+      const restTarget = getRestInteractionPosition(nearestInteraction.placedItem);
 
       if (!restTarget) {
         return currentSnapshot;
@@ -188,15 +211,15 @@ export function useCatBehavior(
         y: restTarget.catPosition.y,
         facingDirection: restTarget.facingDirection,
         currentPointId: restTarget.point.id,
-        currentInteractionItemId: nearestRestInteraction.placedItem.furnitureId,
-        currentInteractionInstanceId: nearestRestInteraction.placedItem.instanceId,
+        currentInteractionItemId: nearestInteraction.placedItem.furnitureId,
+        currentInteractionInstanceId: nearestInteraction.placedItem.instanceId,
         currentInteractionType: 'rest',
         lastInteractionItemId: undefined,
         lastInteractionInstanceId: undefined,
         lastInteractionType: undefined,
       };
     });
-  }, [nearestRestInteraction]);
+  }, [nearestInteraction]);
 
   const stand = useCallback(() => {
     clearFeedbackTimer();
@@ -255,86 +278,123 @@ export function useCatBehavior(
       return;
     }
 
-    if (snapshot.state !== 'idle') {
+    if (snapshot.state === 'playing') {
+      cancelPlaying();
       return;
     }
 
-    const nearestInteraction =
-      nearestRestInteraction && nearestEatInteraction
-        ? nearestRestInteraction.distance <= nearestEatInteraction.distance
-          ? nearestRestInteraction
-          : nearestEatInteraction
-        : nearestRestInteraction ?? nearestEatInteraction;
+    if (snapshot.state !== 'idle') {
+      return;
+    }
 
     if (!nearestInteraction) {
       return;
     }
 
-    if (nearestInteraction.furniture.interaction?.type === 'rest') {
-      sit();
-      return;
+    switch (nearestInteraction.furniture.interaction?.type) {
+      case 'rest':
+        sit();
+        return;
+
+      case 'eat': {
+        if (getPlacedFurnitureFoodState(nearestInteraction.placedItem) === 'empty') {
+          dispatch({
+            type: 'setPlacedFurnitureLayout',
+            placedFurniture: placedFurnitureRef.current.map((item) =>
+              item.instanceId === nearestInteraction.placedItem.instanceId
+                ? {
+                    ...item,
+                    interactionState: {
+                      foodState: 'full',
+                    },
+                  }
+                : item,
+            ),
+          });
+          currentTimedInteractionRef.current = undefined;
+          clearInteractionTimer();
+          clearFeedbackTimer();
+          setInteractionFeedback(undefined);
+          showFoodBowlRefilledFeedback();
+          return;
+        }
+
+        const eatTarget = getEatInteractionPosition(nearestInteraction.placedItem);
+
+        if (!eatTarget) {
+          return;
+        }
+
+        currentTimedInteractionRef.current = nearestInteraction;
+        clearInteractionTimer();
+        clearFeedbackTimer();
+        setInteractionFeedback(undefined);
+        setSnapshot((currentSnapshot) => ({
+          ...currentSnapshot,
+          state: 'eating',
+          x: eatTarget.catStandPosition.x,
+          y: eatTarget.catStandPosition.y,
+          facingDirection: eatTarget.facingDirection,
+          currentPointId: eatTarget.bowlAnchorPoint.id,
+          currentInteractionItemId: nearestInteraction.placedItem.furnitureId,
+          currentInteractionInstanceId: nearestInteraction.placedItem.instanceId,
+          currentInteractionType: 'eat',
+          lastInteractionItemId: undefined,
+          lastInteractionInstanceId: undefined,
+          lastInteractionType: undefined,
+        }));
+        clearMovementInput();
+        interactionTimerRef.current = window.setTimeout(() => {
+          finishTimedInteraction({ consumeFood: true, preserveLastInteraction: true });
+        }, EAT_DURATION_MS);
+        return;
+      }
+
+      case 'play': {
+        const playTarget = getPlayInteractionPosition(nearestInteraction.placedItem);
+
+        if (!playTarget) {
+          return;
+        }
+
+        currentTimedInteractionRef.current = nearestInteraction;
+        clearInteractionTimer();
+        clearFeedbackTimer();
+        setInteractionFeedback(undefined);
+        setSnapshot((currentSnapshot) => ({
+          ...currentSnapshot,
+          state: 'playing',
+          x: playTarget.catPosition.x,
+          y: playTarget.catPosition.y,
+          facingDirection: playTarget.facingDirection,
+          currentPointId: playTarget.toyAnchorPoint.id,
+          currentInteractionItemId: nearestInteraction.placedItem.furnitureId,
+          currentInteractionInstanceId: nearestInteraction.placedItem.instanceId,
+          currentInteractionType: 'play',
+          lastInteractionItemId: undefined,
+          lastInteractionInstanceId: undefined,
+          lastInteractionType: undefined,
+        }));
+        clearMovementInput();
+        interactionTimerRef.current = window.setTimeout(() => {
+          finishTimedInteraction({ consumeFood: false, preserveLastInteraction: false });
+        }, PLAY_DURATION_MS);
+        return;
+      }
+
+      default:
+        return;
     }
-
-    if (getPlacedFurnitureFoodState(nearestInteraction.placedItem) === 'empty') {
-      dispatch({
-        type: 'setPlacedFurnitureLayout',
-        placedFurniture: placedFurnitureRef.current.map((item) =>
-          item.instanceId === nearestInteraction.placedItem.instanceId
-            ? {
-                ...item,
-                interactionState: {
-                  foodState: 'full',
-                },
-              }
-            : item,
-        ),
-      });
-      currentEatingTargetRef.current = undefined;
-      clearEatingTimer();
-      clearFeedbackTimer();
-      setInteractionFeedback(undefined);
-      showFoodBowlRefilledFeedback();
-      return;
-    }
-
-    const eatTarget = getEatInteractionPosition(nearestInteraction.placedItem);
-
-    if (!eatTarget) {
-      return;
-    }
-
-    currentEatingTargetRef.current = nearestInteraction;
-
-    clearEatingTimer();
-    clearFeedbackTimer();
-    setInteractionFeedback(undefined);
-    setSnapshot((currentSnapshot) => ({
-      ...currentSnapshot,
-      state: 'eating',
-      x: eatTarget.catStandPosition.x,
-      y: eatTarget.catStandPosition.y,
-      facingDirection: eatTarget.facingDirection,
-      currentPointId: eatTarget.bowlAnchorPoint.id,
-      currentInteractionItemId: nearestInteraction.placedItem.furnitureId,
-      currentInteractionInstanceId: nearestInteraction.placedItem.instanceId,
-      currentInteractionType: 'eat',
-      lastInteractionItemId: undefined,
-      lastInteractionInstanceId: undefined,
-      lastInteractionType: undefined,
-    }));
-    clearMovementInput();
-    eatingTimerRef.current = window.setTimeout(() => {
-      endEating(true);
-    }, 3000);
   }, [
     cancelEating,
-    endEating,
-    nearestEatInteraction,
-    nearestRestInteraction,
+    cancelPlaying,
+    finishTimedInteraction,
+    nearestInteraction,
     sit,
     snapshot.state,
     stand,
     showFoodBowlRefilledFeedback,
+    dispatch,
   ]);
 
   const commands: CatBehaviorCommands = {
@@ -369,9 +429,9 @@ export function useCatBehavior(
 
   useEffect(
     () => () => {
-      clearEatingTimer();
+      clearInteractionTimer();
       clearFeedbackTimer();
-      currentEatingTargetRef.current = undefined;
+      currentTimedInteractionRef.current = undefined;
     },
     [],
   );
@@ -383,6 +443,7 @@ export function useCatBehavior(
     commandState,
     movementBlocked,
     interactionFeedback,
+    playFrameIndex,
     touchControls,
   };
 }

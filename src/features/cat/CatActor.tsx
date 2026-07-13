@@ -1,5 +1,6 @@
 import { getFurnitureItem } from '../../data/furniture';
 import type { CSSProperties } from 'react';
+import type { PlayFrameIndex } from './playAnimation';
 import type { CatBehaviorSnapshot } from '../../types/catBehavior';
 import type {
   Cat,
@@ -7,6 +8,7 @@ import type {
 } from '../../types/game';
 import {
   getEatInteractionPosition,
+  getPlayInteractionPosition,
   getRestInteractionPosition,
 } from '../../utils/collision';
 import styles from './CatActor.module.css';
@@ -16,6 +18,7 @@ interface CatActorProps {
   cat: Cat;
   behavior: CatBehaviorSnapshot;
   placedFurniture: PlacedFurniture[];
+  playFrameIndex: PlayFrameIndex;
   renderOrder: number;
 }
 
@@ -25,13 +28,16 @@ function getCurrentInteraction(
 ) {
   const interactionType =
     behavior.currentInteractionType ??
-    (behavior.state === 'idle' && behavior.lastInteractionType === 'eat'
-      ? 'eat'
+    (behavior.state === 'idle' &&
+    (behavior.lastInteractionType === 'eat' || behavior.lastInteractionType === 'play')
+      ? behavior.lastInteractionType
       : undefined) ??
     (behavior.state === 'resting'
       ? 'rest'
       : behavior.state === 'eating'
         ? 'eat'
+        : behavior.state === 'playing'
+          ? 'play'
         : undefined);
 
   const interactionItemId = behavior.currentInteractionItemId ?? behavior.lastInteractionItemId;
@@ -66,18 +72,32 @@ function getCurrentInteraction(
       : undefined;
   }
 
-  const eatPosition = getEatInteractionPosition(placedItem);
+  if (interactionType === 'eat') {
+    const eatPosition = getEatInteractionPosition(placedItem);
 
-  return eatPosition
+    return eatPosition
+      ? {
+          placedItem,
+          furniture,
+          interaction: eatPosition.interaction,
+          position: eatPosition,
+          renderPhase:
+            behavior.state === 'idle' && behavior.lastInteractionType === 'eat'
+              ? ('postEat' as const)
+              : ('eat' as const),
+        }
+      : undefined;
+  }
+
+  const playPosition = getPlayInteractionPosition(placedItem);
+
+  return playPosition
     ? {
         placedItem,
         furniture,
-        interaction: eatPosition.interaction,
-        position: eatPosition,
-        renderPhase:
-          behavior.state === 'idle' && behavior.lastInteractionType === 'eat'
-            ? ('postEat' as const)
-            : ('eat' as const),
+        interaction: playPosition.interaction,
+        position: playPosition,
+        renderPhase: 'play' as const,
       }
     : undefined;
 }
@@ -86,6 +106,7 @@ export function CatActor({
   cat,
   behavior,
   placedFurniture,
+  playFrameIndex,
   renderOrder,
 }: CatActorProps) {
   const sprite = cat.sprite;
@@ -93,9 +114,10 @@ export function CatActor({
   const currentInteraction = getCurrentInteraction(behavior, placedFurniture);
   const isResting = behavior.state === 'resting';
   const isEating = behavior.state === 'eating';
+  const isPlaying = behavior.state === 'playing';
   const isPostEating = behavior.state === 'idle' && behavior.lastInteractionType === 'eat';
   const facingDirection =
-    (isResting || isEating) &&
+    (isResting || isEating || isPlaying) &&
     currentInteraction?.interaction.catFacingDirection
       ? currentInteraction.interaction.catFacingDirection
       : behavior.facingDirection;
@@ -104,8 +126,8 @@ export function CatActor({
       ? sprite.restingDisplayScale
       : 1;
   const displayWidth = `clamp(${sprite.minDisplayWidth * interactionScale}px, ${sprite.widthPercent * interactionScale}%, ${sprite.maxDisplayWidth * interactionScale}px)`;
-  const eatShiftStyle: CSSProperties | undefined =
-    (isEating || isPostEating) && currentInteraction?.interaction.type === 'eat'
+  const interactionShiftStyle: CSSProperties | undefined =
+    currentInteraction?.interaction.type === 'eat' && (isEating || isPostEating)
       ? ({
           ['--eat-render-offset-x' as '--eat-render-offset-x']:
             `${isPostEating
@@ -134,6 +156,15 @@ export function CatActor({
           ['--post-eat-mobile-render-scale' as '--post-eat-mobile-render-scale']:
             `${currentInteraction.interaction.postEatMobileRenderScale ?? 1}`,
         } as unknown as CSSProperties)
+      : currentInteraction?.interaction.type === 'play' && isPlaying
+        ? ({
+            ['--eat-render-offset-x' as '--eat-render-offset-x']:
+              `${currentInteraction.interaction.catRenderOffsetX ?? 0}px`,
+            ['--eat-render-offset-y' as '--eat-render-offset-y']:
+              `${currentInteraction.interaction.catRenderOffsetY ?? 0}px`,
+            ['--eat-render-scale' as '--eat-render-scale']:
+              `${currentInteraction.interaction.catScale ?? 1}`,
+          } as unknown as CSSProperties)
       : undefined;
 
   return (
@@ -156,13 +187,14 @@ export function CatActor({
       aria-label={`${cat.name} is ${behavior.state}`}
     >
       <div
-        className={isEating || isPostEating ? styles.eatRenderShift : undefined}
-        style={eatShiftStyle}
-        data-phase={isPostEating ? 'postEat' : isEating ? 'eat' : undefined}
+        className={isEating || isPostEating || isPlaying ? styles.eatRenderShift : undefined}
+        style={interactionShiftStyle}
+        data-phase={isPostEating ? 'postEat' : isEating ? 'eat' : isPlaying ? 'play' : undefined}
       >
         <CatSprite
           behaviorState={behavior.state}
           facingDirection={facingDirection}
+          playFrameIndex={playFrameIndex}
           sourceWidth={sprite.sourceWidth}
           sourceHeight={sprite.sourceHeight}
           variant={sprite.variant}

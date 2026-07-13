@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCatAsset } from '../../data/assets';
+import type { PlayFrameIndex } from './playAnimation';
 import type {
   CatBehaviorState,
   CatSpriteKey,
@@ -10,10 +11,10 @@ import styles from './CatSprite.module.css';
 
 const WALK_FRAME_MS = 220;
 const EAT_FRAME_MS = 300;
-
 interface CatSpriteProps {
   behaviorState: CatBehaviorState;
   facingDirection: FacingDirection;
+  playFrameIndex?: PlayFrameIndex;
   sourceWidth: number;
   sourceHeight: number;
   variant: CatVariant;
@@ -28,6 +29,10 @@ function getSpriteKey(behaviorState: CatBehaviorState, walkFrame: 0 | 1): CatSpr
     return walkFrame === 0 ? 'eat1' : 'eat2';
   }
 
+  if (behaviorState === 'playing') {
+    return walkFrame === 0 ? 'play1' : 'play2';
+  }
+
   if (behaviorState === 'resting') {
     return 'sit';
   }
@@ -38,6 +43,7 @@ function getSpriteKey(behaviorState: CatBehaviorState, walkFrame: 0 | 1): CatSpr
 export function CatSprite({
   behaviorState,
   facingDirection,
+  playFrameIndex,
   sourceWidth,
   sourceHeight,
   variant,
@@ -47,9 +53,18 @@ export function CatSprite({
     {},
   );
   const idleAsset = getCatAsset(variant, 'idle');
-  const spriteKey = getSpriteKey(behaviorState, walkFrame);
+  const spriteFrameIndex = behaviorState === 'playing' ? (playFrameIndex ?? 0) : walkFrame;
+  const spriteKey = getSpriteKey(behaviorState, spriteFrameIndex);
   const fallbackSpriteKey =
-    behaviorState === 'eating' && spriteKey === 'eat1' ? 'eat2' : behaviorState === 'eating' ? 'eat1' : 'idle';
+    behaviorState === 'eating'
+      ? spriteKey === 'eat1'
+        ? 'eat2'
+        : 'eat1'
+      : behaviorState === 'playing'
+        ? spriteKey === 'play1'
+          ? 'play2'
+          : 'play1'
+        : 'idle';
   const spriteAsset = failedSprites[spriteKey]
     ? failedSprites[fallbackSpriteKey]
       ? idleAsset
@@ -61,7 +76,9 @@ export function CatSprite({
   );
 
   useEffect(() => {
-    if (behaviorState !== 'walking' && behaviorState !== 'eating') {
+    if (
+      behaviorState !== 'walking' && behaviorState !== 'eating'
+    ) {
       setWalkFrame(0);
       return undefined;
     }

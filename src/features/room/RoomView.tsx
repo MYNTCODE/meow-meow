@@ -35,6 +35,7 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
     interactionFeedback,
     movementPoints,
     movementBlocked,
+    playFrameIndex,
     touchControls,
   } = useCatBehavior(state.cat, state.placedFurniture, dispatch, isRoomEditing);
   const roomEdit = useRoomEditMode({
@@ -58,6 +59,11 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
       const isEatingTarget =
         catBehavior.state === 'eating' &&
         catBehavior.currentInteractionInstanceId === placedItem.instanceId;
+      const isPlayingTarget =
+        !isRoomEditing &&
+        catBehavior.state === 'playing' &&
+        catBehavior.currentInteractionType === 'play' &&
+        catBehavior.currentInteractionInstanceId === placedItem.instanceId;
 
       return {
         id: `furniture-${placedItem.instanceId}`,
@@ -65,6 +71,7 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
         depth,
         placedItem,
         dragBindings,
+        isPlayingTarget,
         sortBoost: dragBindings.isDragging ? 1000 : isEatingTarget ? 0.02 : isInteracted ? -0.01 : 0,
       };
     }),
@@ -143,6 +150,8 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
                   renderOrder={index + 1}
                   dragBindings={object.dragBindings}
                   isInvalid={roomEdit.invalidFurnitureIds.has(object.placedItem.instanceId)}
+                  isPlayingTarget={object.isPlayingTarget}
+                  playFrameIndex={playFrameIndex}
                 />
               );
             }
@@ -153,6 +162,7 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
                 cat={state.cat}
                 behavior={catBehavior}
                 placedFurniture={placedFurniture}
+                playFrameIndex={playFrameIndex}
                 renderOrder={index + 1}
               />
             );

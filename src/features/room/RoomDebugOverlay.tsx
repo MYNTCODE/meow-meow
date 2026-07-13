@@ -9,6 +9,8 @@ import {
   getCatDepthAnchorY,
   getEatInteractionPosition,
   getEatRenderPosition,
+  getPlayInteractionPosition,
+  getPlayRenderPosition,
   getFurnitureCollisionRect,
   getFurnitureDepthAnchorY,
   getFurnitureInteractionPoint,
@@ -90,12 +92,18 @@ export function RoomDebugOverlay({
     ? roomRectToScreenRect(roomMetrics.roomRect, catCollisionRect)
     : null;
   const currentPlacedFurniture =
-    behavior.state === 'eating' && behavior.currentInteractionInstanceId
+    (behavior.state === 'eating' || behavior.state === 'playing') &&
+    behavior.currentInteractionInstanceId
       ? placedFurniture.find((item) => item.instanceId === behavior.currentInteractionInstanceId)
       : undefined;
-  const currentEatRenderPosition = currentPlacedFurniture
-    ? getEatRenderPosition(currentPlacedFurniture)
-    : undefined;
+  const currentEatRenderPosition =
+    behavior.state === 'eating' && currentPlacedFurniture
+      ? getEatRenderPosition(currentPlacedFurniture)
+      : undefined;
+  const currentPlayRenderPosition =
+    behavior.state === 'playing' && currentPlacedFurniture
+      ? getPlayRenderPosition(currentPlacedFurniture)
+      : undefined;
   const furnitureDebugItems = placedFurniture.flatMap((placedItem) => {
     const furniture = getFurnitureItem(placedItem.furnitureId);
 
@@ -107,6 +115,7 @@ export function RoomDebugOverlay({
     const interactionPoint = getFurnitureInteractionPoint(placedItem);
     const restPosition = getRestInteractionPosition(placedItem);
     const eatPosition = getEatInteractionPosition(placedItem);
+    const playPosition = getPlayInteractionPosition(placedItem);
     const screenAnchor = roomMetrics.roomRect
       ? roomToScreenPoint(roomMetrics.roomRect, {
           x: placedItem.placement.x,
@@ -133,6 +142,7 @@ export function RoomDebugOverlay({
         interactionPoint,
         restPosition,
         eatPosition,
+        playPosition,
         placedItem,
         screenAnchor,
         screenCollisionRect,
@@ -172,6 +182,7 @@ export function RoomDebugOverlay({
           interactionPoint,
           restPosition,
           eatPosition,
+          playPosition,
           placedItem,
         }) => (
           <span key={placedItem.instanceId}>
@@ -252,6 +263,32 @@ export function RoomDebugOverlay({
                 />
               </>
             ) : null}
+            {playPosition ? (
+              <>
+                <span
+                  className={styles.interactionRange}
+                  style={{
+                    left: `${playPosition.toyAnchorPoint.x}%`,
+                    top: `${playPosition.toyAnchorPoint.y}%`,
+                    width: `${playPosition.interaction.range * 2}%`,
+                    height: `${playPosition.interaction.range * 2}%`,
+                  }}
+                  title="Play interaction range"
+                />
+                <DebugMarker
+                  className={styles.interactionAnchor}
+                  label="Play toy anchor"
+                  point={playPosition.toyAnchorPoint}
+                  showLabel={showAnchorLabels}
+                />
+                <DebugMarker
+                  className={styles.restTarget}
+                  label="Play cat target"
+                  point={playPosition.catPosition}
+                  showLabel={showAnchorLabels}
+                />
+              </>
+            ) : null}
             <span
               className={styles.depthAnchor}
               style={{
@@ -277,6 +314,14 @@ export function RoomDebugOverlay({
           showLabel={showAnchorLabels}
         />
       ) : null}
+      {currentPlayRenderPosition ? (
+        <DebugMarker
+          className={styles.restTarget}
+          label="Play render position"
+          point={currentPlayRenderPosition.renderPosition}
+          showLabel={showAnchorLabels}
+        />
+      ) : null}
       <span
         className={styles.anchor}
         style={{
@@ -286,6 +331,7 @@ export function RoomDebugOverlay({
       />
       <div className={styles.readout}>
         <span>State: {behavior.state}</span>
+        <span>Interaction type: {behavior.currentInteractionType ?? behavior.lastInteractionType ?? 'none'}</span>
         <span>Position: {behavior.x.toFixed(1)}, {behavior.y.toFixed(1)}</span>
         <span>Facing: {behavior.facingDirection}</span>
         <span>Blocked: {movementBlocked ? 'yes' : 'no'}</span>
@@ -325,7 +371,16 @@ export function RoomDebugOverlay({
             <span>Eat scale: {currentEatRenderPosition.eatCatScale.toFixed(2)}</span>
           </>
         ) : null}
-        <span>Eating target: {behavior.currentInteractionInstanceId ?? 'none'}</span>
+        {currentPlayRenderPosition ? (
+          <>
+            <span>
+              Play render: {currentPlayRenderPosition.renderPosition.x.toFixed(1)},{' '}
+              {currentPlayRenderPosition.renderPosition.y.toFixed(1)}
+            </span>
+            <span>Play scale: {currentPlayRenderPosition.playCatScale.toFixed(2)}</span>
+          </>
+        ) : null}
+        <span>Active target: {behavior.currentInteractionInstanceId ?? 'none'}</span>
         {furnitureDragDebug ? (
           <>
             <span>Drag item: {furnitureDragDebug.itemId}</span>
@@ -378,6 +433,19 @@ export function RoomDebugOverlay({
                   </span>
                 ),
               )}
+          </>
+        ) : null}
+        {furnitureDebugItems.some(({ furniture }) => furniture.id === 'cat-ball') ? (
+          <>
+            {furnitureDebugItems
+              .filter(({ furniture }) => furniture.id === 'cat-ball')
+              .map(({ interactionPoint, playPosition, placedItem }) => (
+                <span key={placedItem.instanceId}>
+                  Cat ball anchor: {interactionPoint ? `${interactionPoint.x.toFixed(1)}, ${interactionPoint.y.toFixed(1)}` : 'none'}{' '}
+                  | Play target: {playPosition ? `${playPosition.catPosition.x.toFixed(1)}, ${playPosition.catPosition.y.toFixed(1)}` : 'none'}{' '}
+                  | Play range: {playPosition?.interaction.range ?? 0}
+                </span>
+              ))}
           </>
         ) : null}
       </div>

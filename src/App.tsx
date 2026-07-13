@@ -12,6 +12,13 @@ export default function App() {
 
   useCoinIncome();
 
+  function closePanel() {
+    dispatch({
+      type: 'setOpenPanel',
+      panel: null,
+    });
+  }
+
   function handleNavigation(target: 'shop' | 'inventory') {
     dispatch({
       type: 'setOpenPanel',
@@ -23,10 +30,10 @@ export default function App() {
     <main className={styles.gameShell}>
       <TopStatusBar coins={state.coins} />
       <section className={styles.playArea}>
-      <RoomView state={state} dispatch={dispatch} />
+        <RoomView state={state} dispatch={dispatch} />
+        <BottomPanel openPanel={state.openPanel} onRequestClose={closePanel} />
       </section>
       <DevResetButton />
-      <BottomPanel openPanel={state.openPanel} />
       <BottomNavigation
         openPanel={state.openPanel}
         onSelectPanel={handleNavigation}

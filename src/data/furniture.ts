@@ -133,6 +133,46 @@ export const FURNITURE_ITEMS: FurnitureItem[] = [
       height: 8,
     },
   },
+  {
+    id: 'cat-ball',
+    name: 'Cat Ball',
+    description: 'A tiny toy ball for playful zoomies.',
+    price: 35,
+    category: 'toy',
+    assetKey: 'catBall',
+    draggable: true,
+    sourceWidth: 512,
+    sourceHeight: 512,
+    placement: {
+      positionId: 'floor-center',
+      x: 50,
+      y: 73,
+      width: 10,
+      zIndex: 2,
+    },
+    rendering: {
+      depthAnchorOffsetY: -1,
+    },
+    interaction: {
+      type: 'play',
+      range: 18,
+      toyAnchorOffsetX: 0,
+      toyAnchorOffsetY: 0,
+      catOffsetX: 15,
+      catOffsetY: 0,
+      catFacingDirection: 'left',
+      catScale: 1.6,
+      catRenderOffsetX: -8,
+      catRenderOffsetY: 20,
+    },
+    collision: {
+      solid: false,
+      offsetX: -2,
+      offsetY: -1,
+      width: 4,
+      height: 2,
+    },
+  },
 ];
 
 export function getFurnitureItem(id: FurnitureItem['id']) {

@@ -1,24 +1,23 @@
 .gameShell {
-  position: relative;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   width: min(100%, 920px);
-  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
   border-left: 4px solid #6f4e37;
   border-right: 4px solid #6f4e37;
   background: #fff7ec;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
 .playArea {
+  position: relative;
   display: grid;
   place-items: center;
-  min-height: 0;
   padding:
     16px max(12px, env(safe-area-inset-right))
     12px max(12px, env(safe-area-inset-left));
-  overflow-x: clip;
+  overflow-x: hidden;
 }
 
 @media (max-width: 720px) {
