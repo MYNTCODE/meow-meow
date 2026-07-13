@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { getFurnitureAsset } from '../../data/assets';
+import { getFurnitureAssetForPlacement } from '../../data/assets';
 import { getFurnitureItem } from '../../data/furniture';
 import type { PlacedFurniture } from '../../types/game';
 import type { FurnitureDragBindings } from '../../hooks/useFurnitureDrag';
+import { getFurnitureRenderScale } from '../../utils/collision';
 import styles from './FurnitureSprite.module.css';
 
 interface FurnitureSpriteProps {
@@ -26,7 +27,8 @@ export function FurnitureSprite({
   }
 
   const placement = dragBindings.placement ?? placedFurniture.placement;
-  const assetPath = getFurnitureAsset(furniture.assetKey);
+  const scale = getFurnitureRenderScale(furniture);
+  const assetPath = getFurnitureAssetForPlacement(furniture, placedFurniture);
   const aspectRatio = `${furniture.sourceWidth} / ${furniture.sourceHeight}`;
 
   return (
@@ -35,7 +37,7 @@ export function FurnitureSprite({
       style={{
         left: `${placement.x}%`,
         top: `${placement.y}%`,
-        width: `${placement.width}%`,
+        width: `${placement.width * scale}%`,
         aspectRatio,
         zIndex: dragBindings.isDragging ? 1000 : renderOrder,
       }}

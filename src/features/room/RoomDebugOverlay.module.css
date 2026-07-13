@@ -22,7 +22,13 @@
 .point,
 .anchor,
 .depthAnchor,
-.catDepthAnchor {
+.catDepthAnchor,
+.floorAnchor,
+.interactionAnchor,
+.restTarget,
+.eatAnchor,
+.eatTarget,
+.mouthTarget {
   position: absolute;
   width: 10px;
   height: 10px;
@@ -42,6 +48,36 @@
 .depthAnchor {
   border: 2px solid #a16207;
   background: #fff7cc;
+}
+
+.floorAnchor {
+  border: 2px solid #7c3aed;
+  background: #f3e8ff;
+}
+
+.interactionAnchor {
+  border: 2px solid #0891b2;
+  background: #cffafe;
+}
+
+.restTarget {
+  border: 2px solid #9333ea;
+  background: #f5d0fe;
+}
+
+.eatAnchor {
+  border: 2px solid #0f766e;
+  background: #ccfbf1;
+}
+
+.eatTarget {
+  border: 2px solid #b45309;
+  background: #fde68a;
+}
+
+.mouthTarget {
+  border: 2px solid #dc2626;
+  background: #fecaca;
 }
 
 .catDepthAnchor {
@@ -68,6 +104,31 @@
   border: 2px dotted #0891b2;
   border-radius: 50%;
   transform: translate(-50%, -50%);
+}
+
+.markerWrap {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.markerWrap > span:first-child {
+  left: 0;
+  top: 0;
+}
+
+.markerLabel {
+  position: absolute;
+  left: 12px;
+  top: -10px;
+  white-space: nowrap;
+  border: 2px solid #4b3829;
+  background: #fff7ec;
+  color: #4b3829;
+  padding: 1px 4px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .readout {

@@ -80,6 +80,11 @@ export function useContinuousCatMovement({
               ...currentBehavior,
               state: 'idle',
               currentInteractionItemId: undefined,
+              currentInteractionInstanceId: undefined,
+              currentInteractionType: undefined,
+              lastInteractionItemId: undefined,
+              lastInteractionInstanceId: undefined,
+              lastInteractionType: undefined,
             }
           : currentBehavior,
       );
@@ -88,6 +93,7 @@ export function useContinuousCatMovement({
 
     const shouldMove =
       behavior.state !== 'resting' &&
+      behavior.state !== 'eating' &&
       (directionInput.left !== directionInput.right ||
         directionInput.up !== directionInput.down);
 
@@ -99,6 +105,8 @@ export function useContinuousCatMovement({
           ...currentBehavior,
           state: 'idle',
           currentInteractionItemId: undefined,
+          currentInteractionInstanceId: undefined,
+          currentInteractionType: undefined,
         }));
       }
 
@@ -117,7 +125,7 @@ export function useContinuousCatMovement({
       const movementVector = getMovementVector(currentKeys);
       const isMoving = movementVector.x !== 0 || movementVector.y !== 0;
 
-      if (currentBehavior.state === 'resting' || !isMoving) {
+      if (currentBehavior.state === 'resting' || currentBehavior.state === 'eating' || !isMoving) {
         cancelMovementFrame();
         setBehavior((latestBehavior) =>
           latestBehavior.state === 'walking'
@@ -125,6 +133,11 @@ export function useContinuousCatMovement({
                 ...latestBehavior,
                 state: 'idle',
                 currentInteractionItemId: undefined,
+                currentInteractionInstanceId: undefined,
+                currentInteractionType: undefined,
+                lastInteractionItemId: undefined,
+                lastInteractionInstanceId: undefined,
+                lastInteractionType: undefined,
               }
             : latestBehavior,
         );
@@ -175,6 +188,11 @@ export function useContinuousCatMovement({
               ? 'right'
               : currentSnapshot.facingDirection,
         currentInteractionItemId: undefined,
+        currentInteractionInstanceId: undefined,
+        currentInteractionType: undefined,
+        lastInteractionItemId: undefined,
+        lastInteractionInstanceId: undefined,
+        lastInteractionType: undefined,
       }));
       setMovementBlocked(isBlocked);
 

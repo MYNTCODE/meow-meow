@@ -1,8 +1,8 @@
 import { getFurnitureItem } from '../data/furniture';
 import { defaultCat } from '../data/cats';
-import type { FurnitureId, GameState, PanelView } from '../types/game';
+import type { FurnitureId, GameState, OpenPanel } from '../types/game';
 import { DEFAULT_ROOM_NAME, normalizeRoomName } from '../utils/roomName';
-import type { FurniturePlacement, PlacedFurniture } from '../types/game';
+import type { PlacedFurniture } from '../types/game';
 
 function buildPlacedFurnitureInstanceId(furnitureId: FurnitureId, positionId: string) {
   return `${positionId}:${furnitureId}`;
@@ -13,7 +13,7 @@ export type GameAction =
   | { type: 'buyFurniture'; furnitureId: FurnitureId }
   | { type: 'placeFurniture'; furnitureId: FurnitureId; positionId: string }
   | { type: 'setPlacedFurnitureLayout'; placedFurniture: PlacedFurniture[] }
-  | { type: 'setActivePanel'; panel: PanelView }
+  | { type: 'setOpenPanel'; panel: OpenPanel }
   | { type: 'setRoomName'; roomName: string }
   | { type: 'resetGame' };
 
@@ -23,7 +23,7 @@ export const DEFAULT_GAME_STATE: GameState = {
   cat: defaultCat,
   inventory: [],
   placedFurniture: [],
-  activePanel: 'room',
+  openPanel: null,
 };
 
 function addInventoryItem(
@@ -63,6 +63,12 @@ function getDefaultPlacedFurniture(
       width: furniture.placement.width,
       zIndex: furniture.placement.zIndex,
     },
+    interactionState:
+      furnitureId === 'food-bowl'
+        ? {
+            foodState: 'full',
+          }
+        : undefined,
   };
 }
 
@@ -82,6 +88,12 @@ function normalizePlacedFurniture(
         instanceId:
           item.instanceId ?? buildPlacedFurnitureInstanceId(item.furnitureId, item.positionId),
         placement: item.placement ?? defaultItem.placement,
+        interactionState:
+          item.furnitureId === 'food-bowl'
+            ? {
+                foodState: item.interactionState?.foodState ?? 'full',
+              }
+            : item.interactionState,
       },
     ];
   });
@@ -96,7 +108,7 @@ export function createInitialGameState(savedState: Partial<GameState> = {}): Gam
     placedFurniture: normalizePlacedFurniture(
       savedState.placedFurniture ?? DEFAULT_GAME_STATE.placedFurniture,
     ),
-    activePanel: 'room',
+    openPanel: null,
   };
 }
 
@@ -172,10 +184,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         placedFurniture: normalizePlacedFurniture(action.placedFurniture),
       };
 
-    case 'setActivePanel':
+    case 'setOpenPanel':
       return {
         ...state,
-        activePanel: action.panel,
+        openPanel: action.panel,
       };
 
     case 'setRoomName':

@@ -1,4 +1,4 @@
-import type { CatBehaviorState, FacingDirection, FurnitureId } from './game';
+import type { CatBehaviorState, FacingDirection, FurnitureId, FurnitureInteraction } from './game';
 
 export interface CatBehaviorSnapshot {
   state: CatBehaviorState;
@@ -7,6 +7,11 @@ export interface CatBehaviorSnapshot {
   facingDirection: FacingDirection;
   currentPointId: string;
   currentInteractionItemId?: FurnitureId;
+  currentInteractionInstanceId?: string;
+  currentInteractionType?: FurnitureInteraction['type'];
+  lastInteractionItemId?: FurnitureId;
+  lastInteractionInstanceId?: string;
+  lastInteractionType?: FurnitureInteraction['type'];
 }
 
 export interface CatBehaviorCommands {
