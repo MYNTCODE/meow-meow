@@ -8,13 +8,17 @@
   border-left: 4px solid #6f4e37;
   border-right: 4px solid #6f4e37;
   background: #fff7ec;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .playArea {
   display: grid;
   place-items: center;
   min-height: 0;
-  padding: 24px;
+  padding:
+    16px max(12px, env(safe-area-inset-right))
+    12px max(12px, env(safe-area-inset-left));
+  overflow-x: clip;
 }
 
 @media (max-width: 720px) {
@@ -23,6 +27,8 @@
   }
 
   .playArea {
-    padding: 16px;
+    padding:
+      12px max(10px, env(safe-area-inset-right))
+      8px max(10px, env(safe-area-inset-left));
   }
 }

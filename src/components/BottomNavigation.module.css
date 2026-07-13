@@ -4,6 +4,7 @@
   width: 100%;
   border-top: 4px solid #6f4e37;
   background: #ffe6c9;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav button {

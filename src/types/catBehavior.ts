@@ -22,9 +22,9 @@ export interface CatCommandState {
   isWalking: boolean;
 }
 
-export interface CatPressedKeys {
-  leftPressed: boolean;
-  rightPressed: boolean;
-  upPressed: boolean;
-  downPressed: boolean;
-}
+export type DirectionInputState = {
+  left: boolean;
+  right: boolean;
+  up: boolean;
+  down: boolean;
+};

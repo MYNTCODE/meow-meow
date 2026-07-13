@@ -4,6 +4,7 @@ import { useCatBehavior } from '../../hooks/useCatBehavior';
 import { useRoomEditMode } from '../../hooks/useRoomEditMode';
 import { CatActor } from '../cat/CatActor';
 import { CatControlPanel } from '../cat/CatControlPanel';
+import { MobileControls } from '../cat/MobileControls';
 import { FurnitureSprite } from './FurnitureSprite';
 import { RoomEditControls } from './RoomEditControls';
 import { RoomDebugOverlay } from './RoomDebugOverlay';
@@ -24,12 +25,14 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
   const [isRoomEditing, setIsRoomEditing] = useState(false);
   const roomRef = useRef<HTMLElement | null>(null);
   const canShowDebug = import.meta.env.DEV;
+  const showMobileDebugToggle = import.meta.env.DEV && import.meta.env.VITE_SHOW_MOBILE_DEBUG === '1';
   const {
     catBehavior,
     commands,
     commandState,
     movementPoints,
     movementBlocked,
+    touchControls,
   } = useCatBehavior(state.cat, state.placedFurniture, isRoomEditing);
   const roomEdit = useRoomEditMode({
     cat: state.cat,
@@ -87,7 +90,7 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
       <section ref={roomRef} className={styles.roomFrame} aria-label="Mew Mew room">
         {canShowDebug ? (
           <button
-            className={styles.debugToggle}
+            className={`${styles.debugToggle} ${showMobileDebugToggle ? styles.debugToggleMobileVisible : styles.debugToggleMobileHidden}`}
             type="button"
             onClick={() => setShowDebug((currentValue) => !currentValue)}
           >
@@ -149,6 +152,10 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
           />
         ) : null}
       </section>
+      <MobileControls
+        bindDirectionButton={touchControls.bindDirectionButton}
+        interactButton={touchControls.interactButton}
+      />
       <CatControlPanel behavior={catBehavior} />
     </div>
   );

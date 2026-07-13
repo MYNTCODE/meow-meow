@@ -126,6 +126,8 @@ export function useFurnitureDrag({
         return;
       }
 
+      event.preventDefault();
+
       const roomElement = roomRef.current;
 
       if (!roomElement) {
@@ -165,6 +167,8 @@ export function useFurnitureDrag({
       if (!dragState || event.pointerId !== dragState.pointerId) {
         return;
       }
+
+      event.preventDefault();
 
       if (cancelled) {
         setPlacedFurniture((currentFurniture) =>
@@ -229,18 +233,30 @@ export function useFurnitureDrag({
       const handleWindowPointerCancel = (windowEvent: globalThis.PointerEvent) => {
         finishDrag(windowEvent, true);
       };
+      const handleWindowBlur = () => {
+        clearDragState();
+      };
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+          clearDragState();
+        }
+      };
 
       window.addEventListener('pointermove', handleWindowPointerMove);
       window.addEventListener('pointerup', handleWindowPointerUp);
       window.addEventListener('pointercancel', handleWindowPointerCancel);
+      window.addEventListener('blur', handleWindowBlur);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
 
       windowCleanupRef.current = () => {
         window.removeEventListener('pointermove', handleWindowPointerMove);
         window.removeEventListener('pointerup', handleWindowPointerUp);
         window.removeEventListener('pointercancel', handleWindowPointerCancel);
+        window.removeEventListener('blur', handleWindowBlur);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
       };
     },
-    [enabled, finishDrag, handlePointerMove, roomRef, updateDebugState],
+    [clearDragState, enabled, finishDrag, handlePointerMove, roomRef, updateDebugState],
   );
 
   const bindings = useCallback(

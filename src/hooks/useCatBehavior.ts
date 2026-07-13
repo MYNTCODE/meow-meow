@@ -19,7 +19,7 @@ import {
   findNearbyInteraction,
 } from '../utils/collision';
 import { useContinuousCatMovement } from './useContinuousCatMovement';
-import { useCatKeyboardControls } from './useCatKeyboardControls';
+import { useCatInputControls } from './useCatInputControls';
 
 function getInitialSnapshot(): CatBehaviorSnapshot {
   const defaultPoint = getCatMovementPoint(DEFAULT_CAT_MOVEMENT_POINT_ID) ?? catMovementPoints[0];
@@ -151,10 +151,14 @@ export function useCatBehavior(
     canStand,
     isWalking: snapshot.state === 'walking',
   };
-  const pressedKeys = useCatKeyboardControls({ commands, commandState, disabled: inputDisabled });
+  const { directionInput, touchControls } = useCatInputControls({
+    commands,
+    commandState,
+    disabled: inputDisabled,
+  });
 
   useContinuousCatMovement({
-    pressedKeys,
+    directionInput,
     behavior: snapshot,
     setBehavior: setSnapshot,
     cat,
@@ -169,5 +173,6 @@ export function useCatBehavior(
     commands,
     commandState,
     movementBlocked,
+    touchControls,
   };
 }
