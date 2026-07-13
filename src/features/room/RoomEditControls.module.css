@@ -1,27 +1,167 @@
-.controls {
+.roomToolbar {
   display: flex;
-  align-items: center;
+  width: min(100%, 720px);
+  justify-content: flex-end;
+}
+
+.roomToolbarActions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
   gap: 8px;
-  flex-wrap: wrap;
-}
-
-.label {
-  color: #4b3829;
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-
-.button {
-  border: 3px solid #4b3829;
+  padding: 6px;
+  border: 2px solid #6f4e37;
+  border-radius: 4px;
   background: #fff7ec;
-  color: #4b3829;
+  box-shadow: 2px 2px 0 #b98f63;
+}
+
+.roomEditButton,
+.roomResetButton,
+.modalPrimaryButton,
+.modalSecondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 28px;
   padding: 4px 10px;
-  font-size: 0.78rem;
+  border: 2px solid #4b3829;
+  border-radius: 3px;
+  color: #4b3829;
   font-weight: 800;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 #b98f63;
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease,
+    background-color 120ms ease;
+}
+
+.roomEditButton {
+  background: #f2c66d;
+}
+
+.roomEditButtonActive {
+  background: #e6ad59;
+}
+
+.roomResetButton,
+.modalSecondaryButton {
+  background: #f6ead7;
+}
+
+.modalPrimaryButton {
+  background: #e89a77;
+}
+
+.buttonIcon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.roomEditButton:hover,
+.roomResetButton:hover,
+.modalPrimaryButton:hover,
+.modalSecondaryButton:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #b98f63;
+}
+
+.roomEditButton:active,
+.roomResetButton:active,
+.modalPrimaryButton:active,
+.modalSecondaryButton:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 #b98f63;
+}
+
+.roomEditButton:focus-visible,
+.roomResetButton:focus-visible,
+.modalPrimaryButton:focus-visible,
+.modalSecondaryButton:focus-visible {
+  outline: 3px solid #f2c66d;
+  outline-offset: 2px;
+}
+
+.roomEditButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 2px 2px 0 #b98f63;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(75 56 41 / 55%);
   cursor: pointer;
 }
 
-.button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+.modalCard {
+  position: relative;
+  width: min(100%, 360px);
+  padding: 14px;
+  border: 2px solid #6f4e37;
+  border-radius: 4px;
+  background: #fff7ec;
+  box-shadow: 4px 4px 0 #b98f63;
+}
+
+.modalTitle {
+  margin: 0 0 6px;
+  color: #4b3829;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.modalMessage {
+  margin: 0;
+  color: #6a503c;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+@media (max-width: 560px) {
+  .roomToolbarActions {
+    width: 100%;
+    gap: 6px;
+    padding: 5px;
+  }
+
+  .roomEditButton,
+  .roomResetButton {
+    min-height: 26px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+  }
+
+  .modalCard {
+    padding: 12px;
+  }
+
+  .modalPrimaryButton,
+  .modalSecondaryButton {
+    min-height: 26px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+  }
 }

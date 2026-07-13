@@ -3,6 +3,7 @@ import { gameAssets } from '../../data/assets';
 import { useCatBehavior } from '../../hooks/useCatBehavior';
 import { useRoomEditMode } from '../../hooks/useRoomEditMode';
 import { useRoomMetrics } from '../../hooks/useRoomMetrics';
+import { clearGameState } from '../../store/gameStorage';
 import { CatActor } from '../cat/CatActor';
 import { CatControlPanel } from '../cat/CatControlPanel';
 import { MobileControls } from '../cat/MobileControls';
@@ -91,13 +92,19 @@ export function RoomView({ state, dispatch }: RoomViewProps) {
     roomEdit.enterEditMode();
   }
 
+  function handleResetRoom() {
+    roomEdit.cancelLayout();
+    clearGameState();
+    dispatch({ type: 'resetGame' });
+  }
+
   return (
     <div className={styles.roomStack}>
       <RoomEditControls
         isEditing={roomEdit.isEditing}
         isLayoutValid={roomEdit.isLayoutValid}
-        onCancel={roomEdit.cancelLayout}
         onEdit={handleEditRoom}
+        onReset={handleResetRoom}
         onSave={roomEdit.saveLayout}
       />
       <section ref={roomRef} className={styles.roomFrame} aria-label="Mew Mew room">
