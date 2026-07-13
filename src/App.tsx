@@ -12,17 +12,24 @@ export default function App() {
 
   useCoinIncome();
 
+  function handleNavigation(target: 'shop' | 'inventory') {
+    dispatch({
+      type: 'setOpenPanel',
+      panel: state.openPanel === target ? null : target,
+    });
+  }
+
   return (
     <main className={styles.gameShell}>
       <TopStatusBar coins={state.coins} />
       <section className={styles.playArea}>
-        <RoomView state={state} dispatch={dispatch} />
+      <RoomView state={state} dispatch={dispatch} />
       </section>
       <DevResetButton />
-      <BottomPanel activePanel={state.activePanel} />
+      <BottomPanel openPanel={state.openPanel} />
       <BottomNavigation
-        activePanel={state.activePanel}
-        onSelectPanel={(panel) => dispatch({ type: 'setActivePanel', panel })}
+        openPanel={state.openPanel}
+        onSelectPanel={handleNavigation}
       />
     </main>
   );

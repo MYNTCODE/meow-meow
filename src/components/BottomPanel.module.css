@@ -7,3 +7,9 @@
   background: #fff7ec;
   z-index: 10;
 }
+
+@media (pointer: coarse) and (max-width: 720px) {
+  .panelWrap {
+    bottom: 52px;
+  }
+}

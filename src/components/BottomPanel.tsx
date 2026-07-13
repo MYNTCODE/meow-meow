@@ -1,20 +1,20 @@
 import { InventoryPanel } from '../features/inventory/InventoryPanel';
 import { ShopPanel } from '../features/shop/ShopPanel';
-import type { PanelView } from '../types/game';
+import type { OpenPanel } from '../types/game';
 import styles from './BottomPanel.module.css';
 
 interface BottomPanelProps {
-  activePanel: PanelView;
+  openPanel: OpenPanel;
 }
 
-export function BottomPanel({ activePanel }: BottomPanelProps) {
-  if (activePanel === 'room') {
+export function BottomPanel({ openPanel }: BottomPanelProps) {
+  if (openPanel === null) {
     return null;
   }
 
   return (
     <div className={styles.panelWrap}>
-      {activePanel === 'shop' ? <ShopPanel /> : <InventoryPanel />}
+      {openPanel === 'shop' ? <ShopPanel /> : <InventoryPanel />}
     </div>
   );
 }

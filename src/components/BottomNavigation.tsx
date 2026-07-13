@@ -1,25 +1,24 @@
-import type { PanelView } from '../types/game';
+import type { OpenPanel } from '../types/game';
 import styles from './BottomNavigation.module.css';
 
 interface BottomNavigationProps {
-  activePanel: PanelView;
-  onSelectPanel: (panel: PanelView) => void;
+  openPanel: OpenPanel;
+  onSelectPanel: (panel: 'shop' | 'inventory') => void;
 }
 
-const NAV_ITEMS: Array<{ label: string; panel: PanelView }> = [
-  { label: 'Room', panel: 'room' },
+const NAV_ITEMS: Array<{ label: string; panel: 'shop' | 'inventory' }> = [
   { label: 'Shop', panel: 'shop' },
   { label: 'Inventory', panel: 'inventory' },
 ];
 
-export function BottomNavigation({ activePanel, onSelectPanel }: BottomNavigationProps) {
+export function BottomNavigation({ openPanel, onSelectPanel }: BottomNavigationProps) {
   return (
     <nav className={styles.nav} aria-label="Game navigation">
       {NAV_ITEMS.map((item) => (
         <button
           type="button"
           key={item.panel}
-          className={activePanel === item.panel ? styles.active : undefined}
+          className={openPanel === item.panel ? styles.active : undefined}
           onClick={() => onSelectPanel(item.panel)}
         >
           {item.label}
