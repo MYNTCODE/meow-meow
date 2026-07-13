@@ -130,7 +130,7 @@ export const FURNITURE_ITEMS: FurnitureItem[] = [
       offsetX: -8,
       offsetY: -2,
       width: 16,
-      height: 8,
+      height: 10,
     },
   },
   {
